@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------
  * Everything comes from TutorAI.api.analytics.* with { courseId, from, to }:
  *   summary · performanceOverTime · byCourse · byTopic · activity
- * Definitions (README → "Analytics"): progress = coverage of ready lectures,
+ * Definitions (docs/GUIDE.md → "Analytics definitions"): progress = coverage of ready lectures,
  * mastery = mean best per attempted lecture, topic bands strong ≥ 80 ·
  * okay 65–79 · revise < 65. Each chart has an empty state and a data table.
  */

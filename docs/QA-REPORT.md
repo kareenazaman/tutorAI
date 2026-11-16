@@ -56,7 +56,7 @@ The 🔧 marks under 10 are mostly the site-wide contrast fix (muted text on pas
 
 ## Part A: second console removed
 
-Done after the baseline commit (`76c06b4`). Removed its 6 pages, navigation entry, sidebar styles and footer, topbar menu branch, palette actions, profile label, sign-in redirect and credentials, launcher tile, style-guide link, seed account and its notifications. Older stores are migrated (that account and its notifications are dropped, and the student stays signed in). Searching the codebase for the removed role's name finds nothing. The only remaining trace is the `role: 'student'` field (kept for future use), described in the README.
+Done after the baseline commit (`8c07f0f`). Removed its 6 pages, navigation entry, sidebar styles and footer, topbar menu branch, palette actions, profile label, sign-in redirect and credentials, launcher tile, style-guide link, seed account and its notifications. Older stores are migrated (that account and its notifications are dropped, and the student stays signed in). Searching the codebase for the removed role's name finds nothing. The only remaining trace is the `role: 'student'` field (kept for future use), described in [GUIDE.md](GUIDE.md#student-only).
 
 ## Bugs fixed in this stage
 

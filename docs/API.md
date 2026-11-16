@@ -17,7 +17,7 @@ IDs are prefixed strings (`usr_1001`, `crs_2001`, `lec_3001`, `qz_4001`, `q_…`
 | Errors | `{ "success": false, "message": "…", "errors": { "field": "message" } }`, with status `401` (signed out), `403`, `404`, `409` (conflict, e.g. duplicate), `410` (expired link), `413` (file too large), `422` (validation), `503` (AI unavailable). `validation.js` puts `errors.*` messages under the matching form fields. |
 | Field names | JSON uses camelCase (`lectureNumber`). HTML form `name`s are snake_case (`lecture_number`), which is what PHP reads from `$_POST`. Each page script maps one to the other. |
 | Dates | ISO-8601 UTC strings. |
-| Computed values | Course `progress`/`mastery`, quiz status and best score, topic averages, streaks and weekly goal progress are calculated on every request and never stored. The definitions are in the README ("Analytics definitions"). |
+| Computed values | Course `progress`/`mastery`, quiz status and best score, topic averages, streaks and weekly goal progress are calculated on every request and never stored. The definitions are in [GUIDE.md](GUIDE.md#analytics-definitions). |
 
 Notation: `user` = `{ id, role, firstName, lastName, email, institution, program, yearOfStudy, bio, avatarUrl, avatarColor, status, createdAt, lastLoginAt }` (no password fields, ever).
 
@@ -97,7 +97,7 @@ Questions are sent **without** `correct`, `explanation`, `model` or `keywords` e
 | `start(quizId, { fresh })` | POST | `/api/quizzes/{id}/attempts` → `attempts/start.php` | `{ fresh }` | `{ attempt, quiz (no answers), resumed }`. Resumes the open attempt, otherwise starts a new one (retries shuffle the order). Sets `deadlineAt` for timed quizzes. |
 | `get(id)` | GET | `/api/attempts/{id}` → `attempts/show.php` | none | In progress: `{ attempt, quiz (no answers), expired }`. Submitted: `{ attempt, quiz (with answers and explanations), previous, byLecture, byTopic }`. |
 | `save(id, patch)` | PATCH | `/api/attempts/{id}` → `attempts/save.php` | `{ answers: { qid: value }, currentIndex, flagged[] }` | `{ ok }` (autosave). **409** if already submitted. |
-| `submit(id)` | POST | `/api/attempts/{id}/submit` → `attempts/submit.php` | none | `{ id, score, total, percent }`. Grades on the server from stored answers (rules in the README). Logs `quiz_submitted`. |
+| `submit(id)` | POST | `/api/attempts/{id}/submit` → `attempts/submit.php` | none | `{ id, score, total, percent }`. Grades on the server from stored answers (rules in [GUIDE.md](GUIDE.md#grading-rules-servicesquiz-enginejs)). Logs `quiz_submitted`. |
 | `listByQuiz(quizId)` | GET | `/api/quizzes/{id}/attempts` → `attempts/index.php` | none | attempt summaries, newest first (no answers) |
 | `list({ status, courseId, limit })` | GET | `/api/attempts?status=&courseId=&limit=` | none | attempt summaries (Resume banners, recent attempts tables) |
 
