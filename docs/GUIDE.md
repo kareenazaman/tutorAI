@@ -2,7 +2,7 @@
 
 **Learn. Practise. Improve.** An AI-powered study app for university and college students. Students add their courses, upload lecture PDFs, ask an AI Tutor that answers only from their own lecture notes, generate practice quizzes, and track progress and mastery.
 
-This repository is the **complete static frontend**: HTML, CSS and plain JavaScript (Bootstrap 5, no build step). It runs today on a **mock backend** that lives in the browser (`services/api.js` + `data/mock-data.js`) and is ready to switch to the planned **PHP + MySQL** API and **FastAPI** AI service (see [API.md](API.md) and [schema.sql](schema.sql)). TutorAI is student-only.
+This repository is the **complete static frontend**: HTML, CSS and plain JavaScript (Bootstrap 5, no build step). It runs today on a **mock backend** that lives in the browser (`services/api.js` + `data/mock-data.js`) and is ready to switch to the planned **PHP + MySQL** API and **FastAPI** AI service (see [API.md](API.md) and [schema.sql](schema.sql)). There are two roles: students use the app, and admins get a one-page console for accounts and counts.
 
 ## Run it
 
@@ -13,14 +13,14 @@ python3 dev-server.py 8080      # or another port
 
 `dev-server.py` is `python3 -m http.server` with caching turned off (changes show on a normal reload) and a 404 page for missing paths. Plain `python3 -m http.server 5500` also works; press **Cmd/Ctrl+Shift+R** if Chrome keeps old files. An internet connection is needed for the CDNs (Bootstrap, Lucide, Chart.js, marked, DOMPurify, KaTeX, highlight.js, Google Fonts). Port 8000 is left free for the FastAPI AI service.
 
-### Demo account
+### Demo accounts
 
-| | |
-|---|---|
-| Email | `maya.chen@university.ca` |
-| Password | `Practise2026!` |
+| Role | Name | Email | Password |
+|---|---|---|---|
+| Student | Maya Chen | `maya.chen@university.ca` | `Practise2026!` |
+| Admin | Kareena Zaman, Platform Owner | `owner@tutorai.app` | `Practise2026!` |
 
-A fresh browser starts **signed out**: any app page sends you to the sign-in page, which shows these credentials. You can also create your own account (it starts empty). Sample data lives in this browser only. **Reset demo data** in the account menu, or **Restore the sample data** on the sign-in page, puts it back.
+A fresh browser starts **signed out**: any app page sends you to the sign-in page, which shows both accounts. After signing in, each role lands on its own dashboard. Ten more sample students exist for the admin console (fictional `@student.example.edu` addresses; two are deactivated). You can also create your own account (it starts empty). Sample data lives in this browser only. **Reset demo data** in the account menu, or **Restore the sample data** on the sign-in page, puts it back.
 
 ## Pages
 
@@ -45,8 +45,9 @@ A fresh browser starts **signed out**: any app page sends you to the sign-in pag
 | Settings | `pages/student/settings.html#notifications\|goal\|appearance\|privacy\|danger` | Notifications, weekly goal, reduced motion, data export, delete chats, delete account |
 | Not found | `pages/404.html` | Static 404 (served by `dev-server.py` for any missing path) |
 | Design system | `pages/styleguide.html` | Every component, live (opens without signing in) |
+| Admin Dashboard | `pages/admin/dashboard.html?q=&status=` | Admin only (dark shell): stat tiles, user management (search, status filter, activate/deactivate with a required reason), lecture processing, recent activity |
 
-Every sidebar item is a finished page; there are no placeholder pages.
+Every sidebar item is a finished page; there are no placeholder pages. Students who open the admin page get a friendly 403 page; admins who open a student page go to the admin dashboard.
 
 ## Structure
 
@@ -62,6 +63,7 @@ tutorai/
 │   ├── _template.html          Copy this to start a new page
 │   ├── 404.html                Not found (static, no sign-in)
 │   ├── styleguide.html         Every component, live
+│   ├── admin/                  dashboard (the admin console, dark shell)
 │   ├── auth/                   login, register, forgot-password, reset-password (auth layout)
 │   └── student/                dashboard, courses, course, course-upload, lecture, ai-tutor,
 │                               quizzes, quiz-create, quiz-attempt (focus layout), quiz-results,
@@ -78,8 +80,8 @@ tutorai/
     │   ├── core/
     │   │   ├── config.js       App settings and the mock/real data switch
     │   │   ├── utils.js        Escaping, dates, storage, URL helpers, reduced-motion preference
-    │   │   ├── navigation.js   Sidebar menu (single source)
-    │   │   ├── auth.js         requireAuth() / redirectIfSignedIn(): UX-only sign-in check
+    │   │   ├── navigation.js   Student and admin menus (single source)
+    │   │   ├── auth.js         requireAuth() / requireRole() / redirectIfSignedIn(): UX-only checks
     │   │   ├── shell.js        Builds the app layout (sidebar + topbar) around each page
     │   │   ├── auth-layout.js  Split-screen layout for pages/auth/*
     │   │   ├── focus-layout.js Distraction-free layout (no sidebar/topbar) for the quiz player
@@ -109,7 +111,7 @@ Each page declares who it is. `shell.js` injects the sidebar, topbar, notificati
 
 | Attribute | Purpose |
 |---|---|
-| `data-shell` | `student` (the only shell; the app pages are hidden until `core/auth.js` confirms a session) |
+| `data-shell` | `student` or `admin`: picks the sidebar and the role `core/auth.js` requires. App pages stay hidden until the check passes. |
 | `data-page` | The page's own id. Matches an `id` in `navigation.js` to highlight the nav link and set the title. |
 | `data-nav` | Optional: highlight a different nav item. `course.html` uses `data-nav="courses"`. |
 | `data-root` | Path back to the project root |
@@ -141,20 +143,35 @@ TutorAI.shell.setCrumbs([
 
 ## Accounts, settings and backend readiness (stage 6)
 
-### Student-only
+### Roles
 
-TutorAI has one kind of account. The earlier second console (its pages, menu, styles, demo account and notifications) is gone. Each user keeps a `role` field fixed to `'student'` for future use; nothing in the app reads it. Stores from earlier stages are upgraded in place: the other account and its notifications are removed, and the signed-in student stays signed in.
+`users.role` is `student` or `admin`. Sign-up always creates students. The admin side is deliberately small: one page, `pages/admin/dashboard.html` (see [Admin console](#admin-console)). Stores from earlier stages are upgraded in place: the admin account and the sample students are added (with fresh ids where needed), an older admin record takes the new details, `suspended` becomes `deactivated`, and the signed-in user stays signed in. If a migration ever fails, the stored data is kept as it was rather than reseeded.
 
 ### Sign-in and the session
 
 - The mock store holds `session: { userId }`, standing in for the PHP session cookie. A **fresh browser starts signed out**. `auth.login` and `auth.register` set it; `auth.logout` and `account.remove` clear it.
 - While signed out, every API call outside `/auth/*` fails with **401**, as the PHP API will.
 - `core/auth.js`:
-  - `requireAuth()` runs before the shell (and the focus layout) builds a page. Signed-out visitors go to `pages/auth/login.html?next=<page>` and come back after signing in. `next` must be a `pages/student/*.html` path, so sign-in can't be turned into an open redirect.
-  - `redirectIfSignedIn()` sends a signed-in student from the sign-in and create-account pages to the dashboard.
+  - `requireRole(role)` runs before the shell (and the focus layout) builds a page. Signed-out visitors go to `pages/auth/login.html?next=<page>` and come back after signing in. A student opening the admin page gets a friendly **403** page ("Go to my dashboard" / "Sign in as admin"); an admin opening a student page goes to the admin dashboard.
+  - `next` must be a `pages/student/*.html` or `pages/admin/*.html` path **for the signed-in user's role**, so sign-in can't be turned into an open redirect.
+  - `redirectIfSignedIn()` sends a signed-in user from the sign-in and create-account pages to their role's dashboard.
   - App pages are hidden by CSS from the first paint until the check passes, so nothing flashes.
-  - **These checks are UX only.** Anyone can edit browser JavaScript; PHP enforces sessions and ownership on every request.
+  - **These checks are UX only.** Anyone can edit browser JavaScript; PHP enforces sessions, roles and ownership on every request.
+- **Deactivated accounts** can't sign in (403, "This account has been deactivated…"). A student who is deactivated while signed in loses the session on their next request.
 - Seed rows (quizzes, attempts, chats, activity) are created for the demo student (`mockData.demoUserId`), whoever is signed in.
+
+### Admin console
+
+One page, `pages/admin/dashboard.html`, in the dark admin shell. The sidebar has **Admin Dashboard** and **Sign out**; the top bar shows the admin's title ("Platform Owner"). The command-palette search is hidden.
+
+| Section | Data |
+|---|---|
+| Stat tiles | Students (new in 30 days, deactivated), **active users** (active students who signed in or had activity in the last 7 days), courses (archived), lectures (ready / processing / failed). All computed from the store on each load. |
+| User management | Students only, newest first: name, email, program, joined, last active, usage **counts** (courses, lectures, quizzes taken, AI Tutor chats), status. Search (name or email) and status filter, both kept in the URL. **Activate / Deactivate** opens a confirm dialog with a **required reason** (5–300 characters), saved to `admin_actions` with the admin's id. Rows become labelled cards below 992px. |
+| Lecture processing | Counts per status and the lectures that aren't ready (title, size, course code, student, time). |
+| Recent activity | The last 10 events as generic labels ("Uploaded a lecture", "Asked the AI Tutor"). No titles, message text or scores. |
+
+**Privacy rule:** the admin API returns account details and counts only. It never returns chat messages, notes, summaries, lecture text, quiz questions, answers or scores per question. The Node tests check every admin response for these fields.
 
 ### Settings (`user_settings`)
 
@@ -185,8 +202,9 @@ Changes save immediately (`PATCH /api/settings` with just that field). A failed 
 | Mock data kept out of the UI | Pages only call `TutorAI.api.*`; nothing reads `mockData` except `api.js` |
 | Form names match fields | snake_case `name`s (`full_name`, `lecture_number`, `weekly_goal_days`, `confirm`, …) are what PHP reads; each page maps them to the camelCase JSON in `docs/API.md` |
 | Uploads | The upload form is `multipart/form-data`; in live mode `lectures.create` sends `FormData` (`lecture_file`, `title`, `lecture_number`, `description`) |
-| IDs | Prefixed everywhere (`usr_ crs_ lec_ qz_ q_ att_ conv_ msg_ act_ ntf_ sum_ note_`); `nextId()` never reuses a number |
+| IDs | Prefixed everywhere (`usr_ crs_ lec_ qz_ q_ att_ conv_ msg_ act_ ntf_ sum_ note_ adm_`); `nextId()` never reuses a number |
 | No secrets in the browser | localStorage holds only the mock store (`scrub()` drops any password/token/secret key), the remembered email, sidebar state and the motion preference. No API keys anywhere. |
+| Admin sees counts only | `api.admin.*` returns account details and counts; the Node tests scan every admin response for content fields |
 | Demo features are labelled | Sign-in badge "Demo mode", demo-credentials note, upload "Demo mode: files are not uploaded or read", "Preview of extracted text (demo)", generated pages marked "Demo content", "Demo response" on AI replies, "AI feedback (demo)" on short answers, Settings "Demo" note, Reset demo data |
 
 ## Quizzes and learning analytics (stage 5)
@@ -490,7 +508,7 @@ Shared course UI lives in `components/course-ui.js`: `TutorAI.components.CourseC
 | `pages/auth/reset-password.html?token=…` | New password + confirm with strength meter → success state. No token, or a token the API rejects, shows "invalid or expired link". |
 | `pages/student/profile.html` | Header card, view/edit personal details, change password, account information. |
 
-**Demo credentials** (mock mode): `maya.chen@university.ca`, password `Practise2026!`.
+**Demo credentials** (mock mode): student `maya.chen@university.ca`, admin `owner@tutorai.app`, password `Practise2026!` for both.
 Reset token: `demo`. Any email works for "forgot password".
 
 **Mock errors to try**

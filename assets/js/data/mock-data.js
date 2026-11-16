@@ -55,6 +55,39 @@
         createdAt: '2026-09-02T16:00:00Z',
         lastLoginAt: ago(60 * 19),
         status: 'active'
+      },
+
+      // Other students, so the admin console has realistic data. Sign-in works
+      // with the demo password while they're active; their names and emails are fictional.
+      { id: 'usr_1002', role: 'student', firstName: 'Jordan',  lastName: 'Okoro',      email: 'jordan.okoro@student.example.edu',   institution: 'Thompson Rivers University', program: 'BSc Computer Science',      yearOfStudy: 2, avatarUrl: null, avatarColor: 'powder',   bio: '', createdAt: daysAgo(64, 11), lastLoginAt: ago(60 * 2),        status: 'active' },
+      { id: 'usr_1003', role: 'student', firstName: 'Aisha',   lastName: 'Rahman',     email: 'aisha.rahman@student.example.edu',   institution: 'Thompson Rivers University', program: 'BSc Data Science',          yearOfStudy: 3, avatarUrl: null, avatarColor: 'sage',     bio: '', createdAt: daysAgo(58, 15), lastLoginAt: ago(60 * 26),       status: 'active' },
+      { id: 'usr_1004', role: 'student', firstName: 'Lucas',   lastName: 'Moreau',     email: 'lucas.moreau@student.example.edu',   institution: 'Okanagan College',           program: 'Diploma in Web Development', yearOfStudy: 1, avatarUrl: null, avatarColor: 'butter',   bio: '', createdAt: daysAgo(41, 9),  lastLoginAt: daysAgo(3, 20),      status: 'active' },
+      { id: 'usr_1005', role: 'student', firstName: 'Priya',   lastName: 'Nair',       email: 'priya.nair@student.example.edu',     institution: 'Thompson Rivers University', program: 'BBA Information Systems',   yearOfStudy: 4, avatarUrl: null, avatarColor: 'pink',     bio: '', createdAt: daysAgo(37, 13), lastLoginAt: daysAgo(12, 18),     status: 'active' },
+      { id: 'usr_1006', role: 'student', firstName: 'Ethan',   lastName: 'Walker',     email: 'ethan.walker@student.example.edu',   institution: 'Okanagan College',           program: 'BSc Computer Science',      yearOfStudy: 2, avatarUrl: null, avatarColor: 'peach',    bio: '', createdAt: daysAgo(33, 10), lastLoginAt: daysAgo(30, 16),     status: 'deactivated' },
+      { id: 'usr_1007', role: 'student', firstName: 'Sofia',   lastName: 'Rossi',      email: 'sofia.rossi@student.example.edu',    institution: 'Thompson Rivers University', program: 'BSc Mathematics',           yearOfStudy: 3, avatarUrl: null, avatarColor: 'lavender', bio: '', createdAt: daysAgo(26, 14), lastLoginAt: ago(60 * 5),        status: 'active' },
+      { id: 'usr_1008', role: 'student', firstName: 'Noah',    lastName: 'Kim',        email: 'noah.kim@student.example.edu',       institution: 'Thompson Rivers University', program: 'BSc Computer Science',      yearOfStudy: 1, avatarUrl: null, avatarColor: 'powder',   bio: '', createdAt: daysAgo(19, 12), lastLoginAt: daysAgo(2, 9),       status: 'active' },
+      { id: 'usr_1009', role: 'student', firstName: 'Fatima',  lastName: 'Haddad',     email: 'fatima.haddad@student.example.edu',  institution: 'Okanagan College',           program: 'Diploma in Business Analytics', yearOfStudy: 2, avatarUrl: null, avatarColor: 'sage', bio: '', createdAt: daysAgo(12, 16), lastLoginAt: daysAgo(9, 19),     status: 'active' },
+      { id: 'usr_1010', role: 'student', firstName: 'Liam',    lastName: 'O’Connor',   email: 'liam.oconnor@student.example.edu',   institution: 'Thompson Rivers University', program: 'BEng Software Engineering', yearOfStudy: 4, avatarUrl: null, avatarColor: 'butter',   bio: '', createdAt: daysAgo(8, 11),  lastLoginAt: daysAgo(8, 11),      status: 'deactivated' },
+      { id: 'usr_1011', role: 'student', firstName: 'Mei',     lastName: 'Tanaka',     email: 'mei.tanaka@student.example.edu',     institution: 'Thompson Rivers University', program: 'BSc Biology',               yearOfStudy: 2, avatarUrl: null, avatarColor: 'pink',     bio: '', createdAt: daysAgo(3, 10),  lastLoginAt: ago(60 * 30),       status: 'active' },
+
+      // The admin console's demo account (role 'admin'). Sees counts and account
+      // status only — never students' chats, notes or quiz answers.
+      {
+        id: 'usr_9001',
+        role: 'admin',
+        firstName: 'Kareena',
+        lastName: 'Zaman',
+        email: 'owner@tutorai.app',
+        institution: '',
+        program: '',
+        title: 'Platform Owner',
+        yearOfStudy: null,
+        avatarUrl: null,
+        avatarColor: 'peach',
+        bio: '',
+        createdAt: '2026-08-15T16:00:00Z',
+        lastLoginAt: ago(60 * 3),
+        status: 'active'
       }
     ],
 
@@ -112,7 +145,16 @@
         instructor: 'Ms. Hannah Brooks', term: 'Winter 2026', color: 'peach', status: 'archived',
         description: 'HTML, CSS and accessible, responsive layout.',
         createdAt: '2026-01-08T17:00:00Z', lastAccessedAt: daysAgo(190, 10)
-      }
+      },
+
+      // Other students' courses (metadata only — for the admin console's counts)
+      { id: 'crs_2006', userId: 'usr_1002', code: 'COMP 2230', title: 'Data Structures',          instructor: 'Dr. Alan Fox',      term: 'Fall 2026', color: 'powder',   status: 'active', description: '', createdAt: daysAgo(63, 12), lastAccessedAt: ago(60 * 2) },
+      { id: 'crs_2007', userId: 'usr_1002', code: 'MATH 2120', title: 'Discrete Mathematics',     instructor: 'Dr. Ruth Lee',      term: 'Fall 2026', color: 'butter',   status: 'active', description: '', createdAt: daysAgo(60, 12), lastAccessedAt: daysAgo(4, 15) },
+      { id: 'crs_2008', userId: 'usr_1003', code: 'STAT 3050', title: 'Regression Analysis',      instructor: 'Dr. Omar Siddiq',   term: 'Fall 2026', color: 'sage',     status: 'active', description: '', createdAt: daysAgo(57, 16), lastAccessedAt: ago(60 * 26) },
+      { id: 'crs_2009', userId: 'usr_1004', code: 'WEB 1100',  title: 'Intro to Web Development', instructor: 'Ms. Clara Dumont',  term: 'Fall 2026', color: 'peach',    status: 'active', description: '', createdAt: daysAgo(40, 10), lastAccessedAt: daysAgo(3, 20) },
+      { id: 'crs_2010', userId: 'usr_1005', code: 'BUSN 3300', title: 'Information Systems',      instructor: 'Dr. Ken Ito',       term: 'Fall 2026', color: 'pink',     status: 'active', description: '', createdAt: daysAgo(36, 14), lastAccessedAt: daysAgo(12, 18) },
+      { id: 'crs_2011', userId: 'usr_1007', code: 'MATH 3400', title: 'Linear Algebra II',        instructor: 'Dr. Ruth Lee',      term: 'Fall 2026', color: 'lavender', status: 'active', description: '', createdAt: daysAgo(25, 15), lastAccessedAt: ago(60 * 5) },
+      { id: 'crs_2012', userId: 'usr_1011', code: 'BIOL 2200', title: 'Cell Biology',             instructor: 'Dr. Grace Obi',     term: 'Fall 2026', color: 'sage',     status: 'active', description: '', createdAt: daysAgo(3, 10),  lastAccessedAt: ago(60 * 30) }
     ],
 
     /**
@@ -130,7 +172,19 @@
       { id: 'lec_3008', courseId: 'crs_2003', title: 'Gradient descent',                  lectureNumber: 8, description: 'Batch, stochastic and mini-batch gradient descent.',       fileName: 'COMP3520-L08-gradient.pdf',      fileSizeKb: 5320, pageCount: 8, status: 'ready', uploadedAt: ago(45) },
       { id: 'lec_3009', courseId: 'crs_2004', title: 'Conditional probability',           lectureNumber: 3, description: '',                                                          fileName: 'STAT2000-L03-conditional.pdf',   fileSizeKb: 860,  pageCount: 7, status: 'ready', uploadedAt: daysAgo(15, 13) },
       { id: 'lec_3010', courseId: 'crs_2004', title: 'Bayes’ theorem',                    lectureNumber: 5, description: '',                                                          fileName: 'STAT2000-L05-bayes.pdf',         fileSizeKb: 14300, pageCount: 0, status: 'failed', uploadedAt: daysAgo(4, 13) },
-      { id: 'lec_3011', courseId: 'crs_2005', title: 'Semantic HTML',                     lectureNumber: 1, description: '',                                                          fileName: 'COMP2680-L01-html.pdf',          fileSizeKb: 740,  pageCount: 6, status: 'ready', uploadedAt: daysAgo(300, 10) }
+      { id: 'lec_3011', courseId: 'crs_2005', title: 'Semantic HTML',                     lectureNumber: 1, description: '',                                                          fileName: 'COMP2680-L01-html.pdf',          fileSizeKb: 740,  pageCount: 6, status: 'ready', uploadedAt: daysAgo(300, 10) },
+
+      // Other students' lectures (no seed text: ready ones get labelled demo pages)
+      { id: 'lec_3012', courseId: 'crs_2006', title: 'Linked lists',             lectureNumber: 1, description: '', fileName: 'COMP2230-L01-linked-lists.pdf', fileSizeKb: 1180, pageCount: null, status: 'ready',      uploadedAt: daysAgo(50, 10) },
+      { id: 'lec_3013', courseId: 'crs_2006', title: 'Stacks and queues',        lectureNumber: 2, description: '', fileName: 'COMP2230-L02-stacks.pdf',       fileSizeKb: 960,  pageCount: null, status: 'ready',      uploadedAt: daysAgo(43, 10) },
+      { id: 'lec_3014', courseId: 'crs_2006', title: 'Binary search trees',      lectureNumber: 3, description: '', fileName: 'COMP2230-L03-bst.pdf',          fileSizeKb: 2400, pageCount: null, status: 'processing', uploadedAt: ago(4) },
+      { id: 'lec_3015', courseId: 'crs_2007', title: 'Propositional logic',      lectureNumber: 1, description: '', fileName: 'MATH2120-L01-logic.pdf',        fileSizeKb: 700,  pageCount: null, status: 'ready',      uploadedAt: daysAgo(55, 9) },
+      { id: 'lec_3016', courseId: 'crs_2008', title: 'Simple linear regression', lectureNumber: 1, description: '', fileName: 'STAT3050-L01-slr.pdf',          fileSizeKb: 1550, pageCount: null, status: 'ready',      uploadedAt: daysAgo(52, 14) },
+      { id: 'lec_3017', courseId: 'crs_2008', title: 'Residual diagnostics',     lectureNumber: 2, description: '', fileName: 'STAT3050-L02-residuals.pdf',    fileSizeKb: 19800, pageCount: 0,   status: 'failed',     uploadedAt: daysAgo(2, 16) },
+      { id: 'lec_3018', courseId: 'crs_2009', title: 'HTML basics',              lectureNumber: 1, description: '', fileName: 'WEB1100-W01-html.pdf',          fileSizeKb: 640,  pageCount: null, status: 'ready',      uploadedAt: daysAgo(38, 11) },
+      { id: 'lec_3019', courseId: 'crs_2010', title: 'Enterprise systems',       lectureNumber: 1, description: '', fileName: 'BUSN3300-L01-erp.pdf',          fileSizeKb: 1320, pageCount: null, status: 'ready',      uploadedAt: daysAgo(30, 13) },
+      { id: 'lec_3020', courseId: 'crs_2011', title: 'Eigenvalues',              lectureNumber: 4, description: '', fileName: 'MATH3400-L04-eigen.pdf',        fileSizeKb: 1890, pageCount: null, status: 'ready',      uploadedAt: daysAgo(6, 15) },
+      { id: 'lec_3021', courseId: 'crs_2012', title: 'The cell membrane',        lectureNumber: 1, description: '', fileName: 'BIOL2200-L01-membrane.pdf',     fileSizeKb: 2950, pageCount: null, status: 'uploading',  uploadedAt: ago(2) }
     ],
 
     /**
@@ -178,6 +232,19 @@
       { id: 'act_7001', userId: 'usr_1001', type: 'lecture_uploaded', courseId: 'crs_2003', title: 'Uploaded “Gradient descent”',                    createdAt: ago(45) },
       { id: 'act_7003', userId: 'usr_1001', type: 'lecture_uploaded', courseId: 'crs_2001', title: 'Uploaded “REST APIs with PHP”',                  createdAt: daysAgo(1, 10) },
       { id: 'act_7007', userId: 'usr_1001', type: 'lecture_failed',   courseId: 'crs_2004', title: 'Processing failed: “Bayes’ theorem” (file unreadable)', createdAt: daysAgo(4, 13) },
+
+      // Other students (admin console: recent activity, active users)
+      { id: 'act_7101', userId: 'usr_1002', type: 'lecture_uploaded', courseId: 'crs_2006', title: 'Uploaded “Binary search trees”',     createdAt: ago(4) },
+      { id: 'act_7102', userId: 'usr_1011', type: 'lecture_uploaded', courseId: 'crs_2012', title: 'Uploaded “The cell membrane”',       createdAt: ago(2) },
+      { id: 'act_7103', userId: 'usr_1007', type: 'quiz_submitted',   courseId: 'crs_2011', title: 'Submitted a quiz',                   createdAt: ago(60 * 5) },
+      { id: 'act_7104', userId: 'usr_1007', type: 'chat_message',     courseId: 'crs_2011', title: 'Asked the AI Tutor',                 createdAt: ago(60 * 5 + 20) },
+      { id: 'act_7105', userId: 'usr_1003', type: 'lecture_viewed',   courseId: 'crs_2008', title: 'Read “Simple linear regression”',    createdAt: ago(60 * 26) },
+      { id: 'act_7106', userId: 'usr_1003', type: 'lecture_failed',   courseId: 'crs_2008', title: 'Processing failed: “Residual diagnostics” (file too large to process)', createdAt: daysAgo(2, 16) },
+      { id: 'act_7107', userId: 'usr_1008', type: 'course_created',   courseId: null,       title: 'Added a course',                     createdAt: daysAgo(2, 9) },
+      { id: 'act_7108', userId: 'usr_1004', type: 'quiz_submitted',   courseId: 'crs_2009', title: 'Submitted a quiz',                   createdAt: daysAgo(3, 20) },
+      { id: 'act_7109', userId: 'usr_1011', type: 'course_created',   courseId: 'crs_2012', title: 'Added “BIOL 2200”',                  createdAt: daysAgo(3, 10) },
+      { id: 'act_7110', userId: 'usr_1002', type: 'chat_message',     courseId: 'crs_2006', title: 'Asked the AI Tutor',                 createdAt: daysAgo(4, 15) },
+      { id: 'act_7111', userId: 'usr_1005', type: 'notes_generated',  courseId: null,       title: 'Generated study notes',              createdAt: daysAgo(6, 12) }
     ],
 
     notifications: [

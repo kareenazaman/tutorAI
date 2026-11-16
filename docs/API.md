@@ -11,7 +11,8 @@ IDs are prefixed strings (`usr_1001`, `crs_2001`, `lec_3001`, `qz_4001`, `q_…`
 
 | | |
 |---|---|
-| Auth | PHP session cookie (`credentials: 'include'`). Every endpoint except `/api/auth/*` returns **401** without a session, and only returns rows the signed-in student owns (**404** for someone else's id, so ids can't be probed). FastAPI checks the same session (it forwards the cookie to `GET /api/auth/session`, or reads a shared session store) and answers 401 the same way. |
+| Auth | PHP session cookie (`credentials: 'include'`). Every endpoint except `/api/auth/*` returns **401** without a session (or if the account has been deactivated, which also ends the session). Student endpoints only return rows the signed-in student owns (**404** for someone else's id, so ids can't be probed). FastAPI checks the same session (it forwards the cookie to `GET /api/auth/session`, or reads a shared session store) and answers 401 the same way. |
+| Roles | `users.role` is `student` or `admin`, read from MySQL on every request (never trusted from the client). Every `/api/admin/*` endpoint returns **403** unless the role is `admin`. `core/auth.js` only mirrors this for the UX. |
 | Request body | JSON (`Content-Type: application/json`), except the lecture upload, which is `multipart/form-data`. |
 | Success | `200`/`201` with `{ "success": true, "data": … }`. `api.js` unwraps `data`. |
 | Errors | `{ "success": false, "message": "…", "errors": { "field": "message" } }`, with status `401` (signed out), `403`, `404`, `409` (conflict, e.g. duplicate), `410` (expired link), `413` (file too large), `422` (validation), `503` (AI unavailable). `validation.js` puts `errors.*` messages under the matching form fields. |
@@ -19,7 +20,7 @@ IDs are prefixed strings (`usr_1001`, `crs_2001`, `lec_3001`, `qz_4001`, `q_…`
 | Dates | ISO-8601 UTC strings. |
 | Computed values | Course `progress`/`mastery`, quiz status and best score, topic averages, streaks and weekly goal progress are calculated on every request and never stored. The definitions are in [GUIDE.md](GUIDE.md#analytics-definitions). |
 
-Notation: `user` = `{ id, role, firstName, lastName, email, institution, program, yearOfStudy, bio, avatarUrl, avatarColor, status, createdAt, lastLoginAt }` (no password fields, ever).
+Notation: `user` = `{ id, role, firstName, lastName, email, institution, program, yearOfStudy, bio, avatarUrl, avatarColor, status, createdAt, lastLoginAt }`, plus `title` for admins (no password fields, ever). `status` is `active` or `deactivated`.
 
 ---
 
@@ -27,12 +28,12 @@ Notation: `user` = `{ id, role, firstName, lastName, email, institution, program
 
 | Method | HTTP | Endpoint | Request | Response |
 |---|---|---|---|---|
-| `login({ email, password, remember })` | POST | `/api/auth/login` → `auth/login.php` | `{ email, password, remember }` | `user`. Regenerates the session id. **401** with one generic message (never says which field was wrong). **403** if suspended. |
+| `login({ email, password, remember })` | POST | `/api/auth/login` → `auth/login.php` | `{ email, password, remember }` | `user`. Regenerates the session id. **401** with one generic message (never says which field was wrong). **403** if the account is deactivated. The client sends the user to their role's home (`pages/student/dashboard.html` or `pages/admin/dashboard.html`), or to `?next=` if it belongs to that role. |
 | `register({ firstName, lastName, email, password, acceptTerms })` | POST | `/api/auth/register` → `auth/register.php` | same | **201** `user`. Stores `password_hash()` and signs in. **409** email taken, **422** validation. |
 | `requestPasswordReset({ email })` | POST | `/api/auth/forgot-password` → `auth/forgot-password.php` | `{ email }` | Always `{ ok: true }` (no account enumeration). Emails a single-use link; only the token's hash is stored. |
 | `resetPassword({ token, password })` | POST | `/api/auth/reset-password` → `auth/reset-password.php` | `{ token, password }` | `{ ok: true }`. **410** invalid or expired token. |
 | `logout()` | POST | `/api/auth/logout` → `auth/logout.php` | none | `{ ok: true }`. Destroys the session. |
-| `session()` | GET | `/api/auth/session` → `auth/session.php` | none | `{ user }`, or `{ user: null }` when signed out (never 401). Used by `core/auth.js`, a UX check only. |
+| `session()` | GET | `/api/auth/session` → `auth/session.php` | none | `{ user }` (including `role`), or `{ user: null }` when signed out or deactivated (never 401). Used by `core/auth.js` (`requireAuth` / `requireRole`), a UX check only. |
 
 ## Profile: `api.users`
 
@@ -144,6 +145,18 @@ Every AI request is scoped to **one course**: answers use only that course's rea
 | `ai.summarize({ lectureId, options })` | POST | **FastAPI** `/lectures/{id}/summary` | `{ options }` | `{ id, lectureId, courseId, content, sources, createdAt }` (replaces the saved summary) |
 | `ai.studyNotes({ lectureId, options })` | POST | **FastAPI** `/lectures/{id}/notes` | `{ options }` | same shape. Logs `notes_generated`. |
 | `ai.generateQuiz({ lectureId, options })` | POST | (wrapper) | `{ count, difficulty, types }` | calls `quizzes.generate` for that lecture and returns the draft (lecture page → preview) |
+
+## Admin console: `api.admin`
+
+Admin only (**403** otherwise). Admins see account details and **counts**, never chat messages, notes, lecture text, quiz questions or answers.
+
+| Method | HTTP | Endpoint | Request | Response |
+|---|---|---|---|---|
+| `summary()` | GET | `/api/admin/summary` → `admin/summary.php` | none | `{ students, newStudents30d, deactivated, activeUsers, activeWindowDays, courses, archivedCourses, lectures, lecturesByStatus: { ready, inProgress, failed } }`. `activeUsers` = active students who signed in or had any activity in the last 7 days. |
+| `users({ q, status })` | GET | `/api/admin/users?q=&status=` → `admin/users.php` | `q` matches name or email; `status` is `active`/`deactivated` | `[{ id, firstName, lastName, email, avatarColor, institution, program, status, createdAt, lastLoginAt, lastActiveAt, counts: { courses, lectures, quizzesTaken, conversations }, lastStatusChange: { action, reason, at } \| null }]`, students only, newest first |
+| `setUserStatus(id, { status, reason })` | PATCH | `/api/admin/users/{id}/status` → `admin/user-status.php` | `{ status: 'active' \| 'deactivated', reason }` (reason required, 5–300 characters) | the updated row. Writes `admin_actions` (admin id, from/to, reason). Deactivating ends that student's session. **404** not a student (admins can't be changed here), **409** already in that state, **422** missing or invalid reason. |
+| `lectures()` | GET | `/api/admin/lectures` → `admin/lectures.php` | none | `{ counts: { uploading, extracting, processing, ready, failed }, items: [{ id, title, status, fileSizeKb, uploadedAt, course: { id, code }, student: { id, name } }] }`. Items are lectures that aren't ready (in the pipeline or failed), newest first, at most 20. |
+| `activity({ limit })` | GET | `/api/admin/activity?limit=` → `admin/activity.php` | `limit` ≤ 50 | `[{ id, type, label, createdAt, student: { id, name }, course: { code } \| null }]`. `label` is generic ("Asked the AI Tutor", "Submitted a quiz"); no titles, message text or scores. |
 
 ## Mock only: `api.dev`
 

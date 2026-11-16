@@ -1,6 +1,6 @@
 # TutorAI
 
-**Learn. Practise. Improve.** An AI study app for university and college students: add your courses, upload lecture PDFs, ask an AI Tutor that answers only from your own notes, take practice quizzes, and track your progress.
+**Learn. Practise. Improve.** An AI study app for university and college students: add your courses, upload lecture PDFs, ask an AI Tutor that answers only from your own notes, take practice quizzes, and track your progress. Admins get a one-page console to manage student accounts.
 
 This is the frontend (HTML, CSS, JavaScript, Bootstrap 5). It currently runs on a demo backend inside the browser, ready to connect to a PHP + MySQL API and a FastAPI AI service.
 
@@ -12,7 +12,10 @@ python3 dev-server.py
 
 Then open http://localhost:5500.
 
-**Demo login:** `maya.chen@university.ca` / `Practise2026!`
+**Demo logins** (password `Practise2026!` for both):
+
+- Student: `maya.chen@university.ca`
+- Admin: `owner@tutorai.app` (opens the admin dashboard)
 
 ## Docs
 

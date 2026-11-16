@@ -61,13 +61,14 @@ document.addEventListener('tutorai:ready', () => {
 
         // This device follows the account's motion setting (Settings → Appearance)
         try { T.utils.applyMotion((await T.api.settings.get()).reducedMotion); } catch (e) { /* keep the device default */ }
-        const next = T.auth ? T.auth.safeNext(T.utils.queryParam('next')) : null;
-        window.location.href = T.utils.url(next || 'pages/student/dashboard.html');
+        // Role-based landing: the page they asked for (if it's for their role), else their dashboard
+        const next = T.auth.safeNext(T.utils.queryParam('next'), user.role);
+        window.location.href = T.utils.url(next || T.auth.homeFor(user));
       } catch (err) {
         T.ui.setButtonLoading(submit, false);
         formEl.elements.password.value = '';
         V.formAlert(formEl, {
-          title: err.status === 401 ? 'Couldn’t sign you in' : 'Something went wrong',
+          title: err.status === 401 ? 'Couldn’t sign you in' : err.status === 403 ? 'Account deactivated' : 'Something went wrong',
           message: err.message
         });
         formEl.elements.password.focus();

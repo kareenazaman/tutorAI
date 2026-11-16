@@ -1,6 +1,6 @@
 /**
  * TutorAI — Sidebar component
- * Renders the student sidebar from TutorAI.navigation.
+ * Renders the student or admin sidebar from TutorAI.navigation.
  */
 (function (T) {
   'use strict';
@@ -9,6 +9,15 @@
   T.components = T.components || {};
 
   function navItem(item, activeId) {
+    if (item.action) {
+      return `
+      <li>
+        <button type="button" class="tai-nav-link" data-action="${escape(item.action)}" data-bs-title="${escape(item.label)}">
+          ${T.ui.icon(item.icon)}
+          <span class="tai-nav-link__label">${escape(item.label)}</span>
+        </button>
+      </li>`;
+    }
     const active = item.id === activeId;
     return `
       <li>
@@ -24,7 +33,14 @@
       </li>`;
   }
 
-  function footer() {
+  function footer(role) {
+    if (role === 'admin') {
+      return `
+        <div class="tai-sidebar-card">
+          <div class="tai-sidebar-card__title">${T.ui.icon('shield-check', 'icon-sm')}Admin console</div>
+          Account status and counts only. Students’ chats and quiz answers are never shown here.
+        </div>`;
+    }
     return `
       <div class="tai-sidebar-card">
         <div class="tai-sidebar-card__title">${T.ui.icon('sparkles', 'icon-sm')}Stuck on a concept?</div>
@@ -49,7 +65,7 @@
               <img class="tai-brand__mark" src="${escape(url('assets/img/logo-mark.svg'))}" alt="" width="34" height="34">
               <span class="tai-brand__text">
                 <span class="tai-brand__name">TutorAI</span>
-                <span class="tai-brand__tag">${escape(T.config.tagline)}</span>
+                <span class="tai-brand__tag">${role === 'admin' ? 'Admin Console' : escape(T.config.tagline)}</span>
               </span>
             </a>
             <button type="button" class="btn btn-ghost btn-icon btn-sm tai-sidebar__close" data-action="close-sidebar" aria-label="Close menu">
@@ -57,7 +73,7 @@
             </button>
           </div>
           <nav class="tai-sidebar__nav">${sections}</nav>
-          <div class="tai-sidebar__footer">${footer()}</div>
+          <div class="tai-sidebar__footer">${footer(role)}</div>
         </aside>`;
     }
   };

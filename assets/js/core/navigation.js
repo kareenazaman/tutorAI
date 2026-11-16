@@ -1,8 +1,8 @@
 /**
  * TutorAI — navigation config
  * ------------------------------------------------------------------
- * One source for the sidebar (TutorAI is student-only; the user `role`
- * field is kept for future use). `id` must match the page's
+ * One source for both sidebars: the student app and the admin console
+ * (one page). Keyed by user role; body[data-shell] picks which one. `id` must match the page's
  * <body data-page="…"> so the shell can highlight the active link
  * and fill in the topbar title. `href` is relative to the project root;
  * the shell prefixes each page's data-root.
@@ -37,6 +37,23 @@
         }
       ],
       searchPlaceholder: 'Search courses, quizzes and notes…'
+    },
+
+    admin: {
+      role: 'admin',
+      label: 'Admin',
+      home: 'pages/admin/dashboard.html',
+      sections: [
+        {
+          label: 'Admin',
+          items: [
+            { id: 'admin-dashboard', label: 'Admin Dashboard', icon: 'gauge', href: 'pages/admin/dashboard.html' },
+            // An action, not a page: rendered as a button that signs out
+            { id: 'sign-out', label: 'Sign out', icon: 'log-out', action: 'sign-out' }
+          ]
+        }
+      ],
+      searchPlaceholder: 'Search the admin console…'
     }
   };
 

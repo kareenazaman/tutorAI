@@ -17,10 +17,10 @@
 
   function baseItems() {
     const nav = T.navigation[role];
-    const pages = nav.sections.flatMap(s => s.items).map((i, n) => ({
+    const pages = nav.sections.flatMap(s => s.items).filter(i => i.href).map((i, n) => ({
       group: 'Pages', label: i.label, icon: i.icon, tone: TONES[n % TONES.length], href: url(i.href), hint: 'Page'
     }));
-    const actions = [
+    const actions = role === 'admin' ? [] : [
           { group: 'Actions', label: 'Add a course', icon: 'plus', tone: 'butter', href: url('pages/student/courses.html?new=1'), hint: 'Action' },
           { group: 'Actions', label: 'Upload a lecture', icon: 'upload', tone: 'powder', href: url('pages/student/course-upload.html'), hint: 'Action' },
           { group: 'Actions', label: 'Ask the AI Tutor', icon: 'sparkles', tone: 'lavender', href: url('pages/student/ai-tutor.html'), hint: 'AI' },

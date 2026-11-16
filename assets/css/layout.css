@@ -160,6 +160,28 @@
 }
 .tai-sidebar-card .btn { margin-top: var(--tai-space-3); }
 
+/* Admin sidebar: deep charcoal so the admin console is never confused with the student app.
+   Colours meet 4.5:1 on the dark background. */
+.tai-sidebar--admin {
+  --sb-bg:            var(--tai-black);
+  --sb-border:        #26262B;
+  --sb-text:          #A1A1AA;
+  --sb-text-strong:   var(--tai-white);
+  --sb-section:       #8E8E99;
+  --sb-hover-bg:      rgba(255, 255, 255, 0.06);
+  --sb-active-bg:     var(--tai-white);
+  --sb-active-text:   var(--tai-black);
+  --sb-active-icon:   var(--tai-black);
+  --sb-card-bg:       rgba(255, 255, 255, 0.05);
+  --sb-card-border:   rgba(255, 255, 255, 0.08);
+  --sb-card-text:     #A1A1AA;
+}
+.tai-sidebar--admin .tai-sidebar-card__title { color: var(--tai-white); }
+.tai-sidebar--admin .tai-brand__name { color: var(--tai-white); }
+.tai-sidebar--admin .tai-brand__tag { color: #A1A1AA; }
+/* "Sign out" sits in the admin nav as a button styled like a link */
+button.tai-nav-link { width: 100%; border: 0; background: transparent; text-align: left; font-family: inherit; cursor: pointer; }
+
 /* ---- Main column --------------------------------------------------------- */
 .tai-main {
   margin-left: var(--tai-sidebar-w);

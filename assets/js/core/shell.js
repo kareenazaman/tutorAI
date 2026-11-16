@@ -27,7 +27,7 @@
   const C = T.components;
 
   let app;       // .tai-app root
-  let role;      // always 'student' (navigation key)
+  let role;      // 'student' | 'admin' — from body[data-shell], also the navigation key
   let tooltips = [];
 
   /* ---- Build -------------------------------------------------------------- */
@@ -253,8 +253,8 @@
   /* ---- Boot --------------------------------------------------------------- */
   async function init() {
     if (!document.body.dataset.shell || !T.navigation[document.body.dataset.shell]) return;
-    // UX-only sign-in check (core/auth.js). The PHP API enforces sessions server-side.
-    const signedIn = await T.auth.requireAuth();
+    // UX-only sign-in and role check (core/auth.js). The PHP API enforces sessions and roles.
+    const signedIn = await T.auth.requireRole(document.body.dataset.shell);
     if (!signedIn && document.body.dataset.auth !== 'optional') return;
     build();
     initSidebarState();

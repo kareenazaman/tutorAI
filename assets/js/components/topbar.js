@@ -9,13 +9,16 @@
   const { escape, url, initials, fullName } = T.utils;
   T.components = T.components || {};
 
-  function profileMenu() {
+  function profileMenu(role) {
+    const reset = T.config.useMockData ? `<li><hr class="dropdown-divider"></li>
+      <li><button type="button" class="dropdown-item" data-action="reset-demo-data">${T.ui.icon('rotate-ccw')}Reset demo data</button></li>` : '';
+    if (role === 'admin') {
+      return `<li><a class="dropdown-item" href="${escape(url('pages/admin/dashboard.html'))}">${T.ui.icon('gauge')}Admin Dashboard</a></li>${reset}`;
+    }
     return `
       <li><a class="dropdown-item" href="${escape(url('pages/student/profile.html'))}">${T.ui.icon('user')}My Profile</a></li>
       <li><a class="dropdown-item" href="${escape(url('pages/student/settings.html'))}">${T.ui.icon('settings')}Settings</a></li>
-      <li><a class="dropdown-item" href="${escape(url('pages/student/progress.html'))}">${T.ui.icon('chart-line')}My Progress</a></li>
-      ${T.config.useMockData ? `<li><hr class="dropdown-divider"></li>
-      <li><button type="button" class="dropdown-item" data-action="reset-demo-data">${T.ui.icon('rotate-ccw')}Reset demo data</button></li>` : ''}`;
+      <li><a class="dropdown-item" href="${escape(url('pages/student/progress.html'))}">${T.ui.icon('chart-line')}My Progress</a></li>${reset}`;
   }
 
   T.components.Topbar = {
@@ -60,9 +63,9 @@
                 <div class="tai-dropdown-panel__body" data-notification-list>
                   ${T.ui.skeleton('list', 3)}
                 </div>
-                <div class="tai-dropdown-panel__footer">
+                ${role === 'admin' ? '' : `<div class="tai-dropdown-panel__footer">
                   <a class="btn btn-ghost btn-sm w-100" href="${escape(url('pages/student/settings.html#notifications'))}">${T.ui.icon('settings', 'icon-sm')}Notification settings</a>
-                </div>
+                </div>`}
               </div>
             </div>
 
@@ -71,7 +74,7 @@
                 <span class="tai-avatar" data-user-avatar></span>
                 <span class="tai-profile-btn__text">
                   <span class="tai-profile-btn__name" data-user-name>&nbsp;</span>
-                  <span class="tai-profile-btn__role">Student</span>
+                  <span class="tai-profile-btn__role">${role === 'admin' ? 'Administrator' : 'Student'}</span>
                 </span>
                 ${T.ui.icon('chevron-down')}
               </button>
@@ -84,7 +87,7 @@
                   </span>
                 </li>
                 <li><hr class="dropdown-divider"></li>
-                ${profileMenu()}
+                ${profileMenu(role)}
                 <li><hr class="dropdown-divider"></li>
                 <li><button type="button" class="dropdown-item text-danger" data-action="sign-out">${T.ui.icon('log-out')}Sign out</button></li>
               </ul>
@@ -98,6 +101,7 @@
       const name = fullName(user);
       scope.querySelectorAll('[data-user-name]').forEach(el => { el.textContent = name; });
       scope.querySelectorAll('[data-user-email]').forEach(el => { el.textContent = user.email || ''; });
+      if (user.role === 'admin') scope.querySelectorAll('.tai-profile-btn__role').forEach(el => { el.textContent = user.title || 'Administrator'; });
       scope.querySelectorAll('[data-user-avatar]').forEach(el => {
         Array.from(el.classList).filter(c => c.startsWith('tai-avatar--') && c !== 'tai-avatar--lg' && c !== 'tai-avatar--sm' && c !== 'tai-avatar--xl')
           .forEach(c => el.classList.remove(c));

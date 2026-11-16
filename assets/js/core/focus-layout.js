@@ -15,7 +15,7 @@
   async function init() {
     if (document.body.dataset.layout !== 'focus') return;
     // UX-only sign-in check (core/auth.js); signed-out visitors are sent to sign in
-    const user = await T.auth.requireAuth();
+    const user = await T.auth.requireRole('student');
     if (!user) return;
     document.body.classList.add('tai-focus');
     const main = document.getElementById('page-content');

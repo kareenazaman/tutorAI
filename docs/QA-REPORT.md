@@ -37,6 +37,7 @@ Columns follow the Part C checklist. 1 complete · 2 links and buttons · 3 layo
 | Settings (new) | 🔧 | 🔧 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | 404 (new) | 🔧 | ✅ | ✅ | ✅ | n/a | n/a | ✅ | ✅ | ✅ |
 | Design system | ✅ | 🔧 | ✅ | ✅ | n/a | n/a | 🔧 | ✅ | ✅ |
+| Admin Dashboard (restored) | 🔧 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 🔧 | ✅ |
 
 The 🔧 marks under 10 are mostly the site-wide contrast fix (muted text on pastel tiles). Each 🔧 is explained under "Bugs fixed".
 
@@ -54,9 +55,9 @@ The 🔧 marks under 10 are mostly the site-wide contrast fix (muted text on pas
 | 12 | No console errors or warnings; dead code and unused files removed; libraries only where used | ✅ 0 messages on all pages. 🔧 Removed: the placeholder-page renderer, an unreachable quiz toast, the unused `search.query` endpoint, the empty `assets/icons/`, commented-out script blocks, and `validation.js` on 4 pages that have no forms. Lucide pinned to 1.73.0 (was `@latest`). |
 | 13 | Quiz leave-warning only while a save is pending | 🔧 A change counter: the warning shows only when a change is waiting for its debounce, a save is in flight, or the last save failed. Verified: leaving right after a saved answer is silent; leaving mid-typing warns. |
 
-## Part A: second console removed
+## Part A: admin side (removed, then restored as one page)
 
-Done after the baseline commit (`8c07f0f`). Removed its 6 pages, navigation entry, sidebar styles and footer, topbar menu branch, palette actions, profile label, sign-in redirect and credentials, launcher tile, style-guide link, seed account and its notifications. Older stores are migrated (that account and its notifications are dropped, and the student stays signed in). Searching the codebase for the removed role's name finds nothing. The only remaining trace is the `role: 'student'` field (kept for future use), described in [GUIDE.md](GUIDE.md#student-only).
+Stage 6 first removed the old admin console (6 placeholder pages). The assignment requires an admin page, so a **minimal admin side** was rebuilt against the current code, using the baseline commit (`8c07f0f`) only as reference: one page, `pages/admin/dashboard.html`, in the dark admin shell. See "Admin console" below.
 
 ## Bugs fixed in this stage
 
@@ -90,13 +91,40 @@ Done after the baseline commit (`8c07f0f`). Removed its 6 pages, navigation entr
 | ID prefixes consistent | ✅ `usr_ crs_ lec_ qz_ q_ att_ conv_ msg_ act_ ntf_ sum_ note_`, never reused. |
 | No passwords or tokens in localStorage | ✅ A scan of the stored keys finds none; the demo password string doesn't appear. Matches for "token" or "password" are lecture text (e.g. "bearer token", `password_hash`). |
 | Every mock feature labelled as demo | ✅ Sign-in badge and credentials, upload notice, "Preview of extracted text — demo", "Demo content" pages, "Demo response" on AI answers, "AI feedback (demo)", Settings "Demo" note, terms "Demo" badge, Reset demo data. |
-| Schema and API docs | ✅ `docs/schema.sql` (17 tables: PKs, FKs with cascade rules, indexes, enums, a FULLTEXT key for retrieval). `docs/API.md` (every `api.js` method → HTTP method, PHP/FastAPI endpoint, request, response). |
+| Schema and API docs | ✅ `docs/schema.sql` (18 tables, including `admin_actions`: PKs, FKs with cascade rules, indexes, enums, a FULLTEXT key for retrieval). `docs/API.md` (every `api.js` method → HTTP method, PHP/FastAPI endpoint, request, response). |
+
+## Admin console (restored)
+
+**What it is:** one page with stat tiles (students, active users, courses, lectures), user management (search, status filter, activate/deactivate with a confirm dialog and a required reason), lecture processing status and recent activity. The demo admin is "Kareena Zaman, Platform Owner" (`owner@tutorai.app`). Ten fictional students were added to the seed; no passwords are stored for anyone.
+
+| Check | Result |
+|---|---|
+| Role guard | ✅ Student → admin page: friendly 403 page (no shell, focus on the heading). Admin → any student page or the quiz player: sent to the admin dashboard. Signed-out → sign-in with `?next=`, then back to the admin page (with its filters). |
+| Role-based redirect after login | ✅ Admin lands on the admin dashboard, students on theirs. `next` is only followed if it belongs to the user's role. |
+| API role enforcement | ✅ A student calling any `api.admin.*` method gets 403. |
+| Admin sees counts only | ✅ Every admin response was scanned for `content`, `answers`, `messages`, `password`, `prompt`, `correct`: none found. Activity uses generic labels. |
+| Activate / deactivate | ✅ Empty reason → inline error; < 5 characters → 422; already in that state → 409; admins can't be changed (404). The success toast and live region announce it, focus returns to the row's button, and the change is written to `admin_actions` with the reason. |
+| Deactivated users can't sign in | ✅ Login → 403 "This account has been deactivated…" (the form now titles it "Account deactivated"). A student deactivated while signed in loses the session on their next request. |
+| Both demo accounts on the sign-in page | ✅ |
+| Migration | ✅ A Stage 4 store (old admin record) and a Stage 6 store (student only, with an id collision) both keep the user's data and sign-in, gain the admin and sample students, and get no duplicate ids. |
+| 1440 / 768 / 390 | ✅ Headless Chrome sweep of **every** page at all three widths, as the right role: 0 console messages, 0 overflow, 0 contrast failures, 0 unlabelled fields or unnamed buttons. |
+
+**Bugs found and fixed while restoring it**
+
+1. **A failed store migration silently reseeded the store**, wiping the user's data. The new migration called a helper defined later in the file; the loader's catch then started fresh. Fixed the call, and the loader now keeps the stored data if a migration ever fails.
+2. **Visually hidden table headers could widen the page** (+101px at 768). The absolutely positioned label escaped the table's scroll container. `.tai-table-wrap` is now `position: relative`, which fixes this for every table.
+3. **The user table squeezed Status and Action off-screen at tablet width**; rows now become labelled cards below 992px.
+4. A deactivated user's sign-in error was titled "Something went wrong". It now says "Account deactivated".
+5. Activity labels lower-cased "AI" ("asked the ai tutor").
+
+**How it was tested:** the Claude-in-Chrome connection dropped during this round, so the checks above ran in headless Chrome, driven over the DevTools protocol from Node (real page loads, clicks and form submits; screenshots reviewed at 1440, 768 and 390), plus Node tests of the API.
 
 ## Known limitations (what is mocked, and why)
 
 | Area | Today (demo) | Why | Production plan |
 |---|---|---|---|
 | Accounts and sessions | `session.userId` in the browser's mock store; one demo password accepted for every account; nothing sent anywhere | No server in this build | PHP sessions (httpOnly cookie), `password_hash()`, CSRF tokens on writes, rate-limited login |
+| Roles and the admin console | Role checks run in the mock API and `core/auth.js`. Deactivating someone only affects this browser's store, so an open session elsewhere isn't ended. | No server | PHP reads `users.role` on every `/api/admin/*` call; deactivation deletes that user's server sessions |
 | Sign-in guard | `core/auth.js` hides pages and redirects | UX only: client checks can always be bypassed | PHP checks the session and ownership on every request (401/404) |
 | Database | localStorage (`tai.mockdb.v1`), one browser only, ~5 MB | Static hosting | MySQL 8 using `docs/schema.sql` (**not yet run against a MySQL server**: none was available during review) |
 | Lecture upload | File checked (type, size), never read or stored; processing steps simulated; uploaded lectures get labelled placeholder pages | No backend storage or PDF parser | `upload.php` stores the PDF outside the web root; a worker extracts text into `lecture_pages` |

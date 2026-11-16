@@ -55,13 +55,13 @@
   /** Tables every store has had since stage 3. */
   const CORE_TABLES = ['users', 'session', 'courses', 'lectures', 'quizzes', 'activity', 'notifications'];
   /** Stage 4–6 tables — added in place to older stores (see migrate()). */
-  const AI_TABLES = ['lectureContent', 'conversations', 'messages', 'summaries', 'notes', 'attempts', 'settings'];
+  const AI_TABLES = ['lectureContent', 'conversations', 'messages', 'summaries', 'notes', 'attempts', 'settings', 'adminActions'];
   const TABLES = [...CORE_TABLES, ...AI_TABLES];
   const fixtures = T.mockData.auth;          // demo password etc. — memory only, never saved
 
   function seed() {
     // `fresh` → ensureContent() builds quizzes/attempts from the seed plans once helpers exist
-    const data = { meta: { version: STORE_VERSION, seededAt: nowIso(), fresh: true } };
+    const data = { meta: { version: STORE_VERSION, seededAt: nowIso(), fresh: true, adminSeeded: true } };
     CORE_TABLES.forEach(t => { data[t] = t === 'quizzes' ? [] : clone(T.mockData[t]); });
     AI_TABLES.forEach(t => { data[t] = []; });
     return data;
@@ -88,16 +88,55 @@
   function migrate(data) {
     let changed = false;
     AI_TABLES.forEach(t => { if (!Array.isArray(data[t])) { data[t] = []; changed = true; } });
-    // Stage 6: one { userId } session (was one per shell); student accounts only
+    // Stage 6: one { userId } session (was one per shell)
     if (!('userId' in data.session)) { data.session = { userId: data.session.student || null }; changed = true; }
-    const others = data.users.filter(u => u.role !== 'student').map(u => u.id);
-    if (others.length) {
-      data.users = data.users.filter(u => !others.includes(u.id));
-      data.notifications = data.notifications.filter(n => !others.includes(n.userId));
-      if (others.includes(data.session.userId)) data.session.userId = null;
-      changed = true;
-    }
+    // Account status is 'active' | 'deactivated' (older stores said 'suspended')
+    data.users.forEach(u => { if (u.status === 'suspended') { u.status = 'deactivated'; changed = true; } });
+    if (!data.meta.adminSeeded) { addAdminSeed(data); changed = true; }
     return changed;
+  }
+
+  /**
+   * Stores created before the admin console: add the admin account and the
+   * other sample students with their courses, lectures and activity. New rows
+   * get fresh ids (never reusing a number) and references are remapped.
+   */
+  function addAdminSeed(data) {
+    const seed = T.mockData;
+    const seq = (data.meta.sequences = data.meta.sequences || {});
+    const fresh = (prefix, table) => {
+      const max = table.reduce((m, r) => Math.max(m, parseInt(String(r.id).split('_')[1], 10) || 0), 0);
+      seq[prefix] = Math.max(seq[prefix] || 0, max) + 1;
+      return `${prefix}_${seq[prefix]}`;
+    };
+    const demo = seed.demoUserId;
+    // Runs while the store loads, before later helpers exist: use only local ones
+    const lower = (email) => String(email || '').trim().toLowerCase();
+    seed.users.forEach(u => {
+      const existing = data.users.find(x => x.id === u.id);
+      if (existing && u.role === 'admin') {
+        // An older admin record: take the current seed's details, drop its old notifications
+        Object.assign(existing, clone(u), { lastLoginAt: existing.lastLoginAt });
+        data.notifications = data.notifications.filter(n => n.userId !== u.id);
+      } else if (!existing && !data.users.some(x => lower(x.email) === lower(u.email))) {
+        data.users.push(clone(u));
+      }
+    });
+    const courseMap = {};
+    seed.courses.filter(c => c.userId !== demo && data.users.some(u => u.id === c.userId)).forEach(c => {
+      const id = data.courses.some(x => x.id === c.id) ? fresh('crs', data.courses) : c.id;
+      courseMap[c.id] = id;
+      data.courses.push({ ...clone(c), id });
+    });
+    seed.lectures.filter(l => courseMap[l.courseId]).forEach(l => {
+      const id = data.lectures.some(x => x.id === l.id) ? fresh('lec', data.lectures) : l.id;
+      data.lectures.push({ ...clone(l), id, courseId: courseMap[l.courseId] });
+    });
+    seed.activity.filter(a => a.userId !== demo && data.users.some(u => u.id === a.userId)).forEach(a => {
+      const id = data.activity.some(x => x.id === a.id) ? fresh('act', data.activity) : a.id;
+      data.activity.push({ ...clone(a), id, courseId: a.courseId ? (courseMap[a.courseId] || null) : null });
+    });
+    data.meta.adminSeeded = true;
   }
 
   function save() {
@@ -113,7 +152,10 @@
       if (raw) {
         const data = JSON.parse(raw);
         if (isValidStore(data)) {
-          if (migrate(data)) { db = data; save(); }
+          // A failed migration must never wipe the student's data: keep it as stored
+          let migrated = false;
+          try { migrated = migrate(data); } catch (err) { migrated = false; }
+          if (migrated) { db = data; save(); }
           return data;
         }
       }
@@ -183,9 +225,15 @@
       if (typeof mock !== 'function') {
         return Promise.reject(new ApiError(`No mock handler for ${method} ${path}`, 501));
       }
-      // Like the PHP session check: everything outside /auth needs a signed-in user
-      if (!path.startsWith('/auth/') && !me()) {
-        return wait(latency ?? cfg.mockLatencyMs).then(() => { throw new ApiError('Please sign in to continue.', 401); });
+      // Like the PHP session check: everything outside /auth needs a signed-in, active user
+      if (!path.startsWith('/auth/')) {
+        const user = sessionUser();
+        if (!user) return wait(latency ?? cfg.mockLatencyMs).then(() => { throw new ApiError('Please sign in to continue.', 401); });
+        if (user.status !== 'active') {
+          // Deactivated while signed in: end the session, as session.php will
+          db.session.userId = null; save();
+          return wait(latency ?? cfg.mockLatencyMs).then(() => { throw new ApiError('This account has been deactivated.', 401); });
+        }
       }
       return fromMock(method, mock, { latency });
     }
@@ -415,6 +463,38 @@
     start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
     const days = new Set(db.activity.filter(a => a.userId === userId && new Date(a.createdAt) >= start).map(a => dayKey(a.createdAt)));
     return { goalDays: userSettings(userId).weeklyGoalDays, studiedDays: days.size, weekStart: start.toISOString() };
+  }
+
+  /* ---- Admin helpers -------------------------------------------------------- */
+  const requireAdmin = () => ((sessionUser() || {}).role === 'admin' ? null : new ApiError('Only administrators can do that.', 403));
+  const fullName = (u) => `${u.firstName} ${u.lastName}`.trim();
+  const ADMIN_ACTIVITY_LABEL = {
+    course_created: 'Added a course', course_updated: 'Updated a course', course_deleted: 'Deleted a course',
+    lecture_uploaded: 'Uploaded a lecture', lecture_failed: 'Lecture processing failed', lecture_deleted: 'Deleted a lecture',
+    lecture_viewed: 'Read a lecture', chat_message: 'Asked the AI Tutor', notes_generated: 'Generated study notes',
+    quiz_created: 'Created a quiz', quiz_submitted: 'Submitted a quiz'
+  };
+  /** Latest of sign-in and logged activity (ISO string, '' if never). */
+  function lastActiveAt(u) {
+    const acts = db.activity.filter(a => a.userId === u.id).map(a => a.createdAt);
+    return [u.lastLoginAt || '', ...acts].sort().pop() || '';
+  }
+  /** One row of the admin user table: account details and usage counts, no content. */
+  function adminUserRow(u) {
+    const courseIds = new Set(db.courses.filter(c => c.userId === u.id).map(c => c.id));
+    const lastAction = db.adminActions.filter(x => x.userId === u.id).sort(byNewest('createdAt'))[0];
+    return {
+      id: u.id, firstName: u.firstName, lastName: u.lastName, email: u.email, avatarColor: u.avatarColor,
+      institution: u.institution, program: u.program, status: u.status,
+      createdAt: u.createdAt, lastLoginAt: u.lastLoginAt || null, lastActiveAt: lastActiveAt(u) || null,
+      counts: {
+        courses: courseIds.size,
+        lectures: db.lectures.filter(l => courseIds.has(l.courseId)).length,
+        quizzesTaken: db.attempts.filter(a => a.userId === u.id && a.status === 'submitted').length,
+        conversations: db.conversations.filter(c => c.userId === u.id).length
+      },
+      lastStatusChange: lastAction ? { action: lastAction.action, reason: lastAction.reason, at: lastAction.createdAt } : null
+    };
   }
 
   const courseRef = (c) => (c ? { id: c.id, code: c.code, title: c.title, color: c.color } : null);
@@ -702,7 +782,6 @@
 
   /* ---- Lecture content (extracted text) ------------------------------------ */
   const contentFor = (lectureId) => db.lectureContent.find(c => c.lectureId === lectureId);
-  const isSeedLecture = (id) => (T.mockData.lectures || []).some(l => l.id === id);
 
   /**
    * Demo stand-in pages for a lecture uploaded in the browser — the PDF is
@@ -938,7 +1017,7 @@
         db.lectureContent.push({ lectureId: l.id, generated: false, pages: seedContent[l.id].map((pg, i) => ({ page: i + 1, heading: pg.heading, text: pg.text })) });
         l.pageCount = seedContent[l.id].length;
         changed = true;
-      } else if (l.status === 'ready' && !isSeedLecture(l.id)) {
+      } else if (l.status === 'ready') {         // uploaded in the browser, or a seed lecture without seed text
         const pages = placeholderPages(l);
         db.lectureContent.push({ lectureId: l.id, generated: true, pages });
         l.pageCount = pages.length;
@@ -990,7 +1069,9 @@
           if (!user || password !== fixtures.demoPassword) {
             return new ApiError('Incorrect email or password. Check your details and try again.', 401);
           }
-          if (user.status !== 'active') return new ApiError('This account has been suspended.', 403);
+          if (user.status !== 'active') {
+            return new ApiError('This account has been deactivated. Contact TutorAI support if you think this is a mistake.', 403);
+          }
           user.lastLoginAt = nowIso();
           db.session.userId = user.id;       // PHP: session_regenerate_id(); $_SESSION['user_id'] = …
           return user;
@@ -1051,7 +1132,14 @@
        * 200 → { user } when signed in, { user: null } when not (never 401, so
        * pages can ask without an error). Used by core/auth.js — a UX check only.
        */
-      session: () => request('GET', '/auth/session', { latency: 0, mock: () => ({ user: sessionUser() }) })
+      session: () => request('GET', '/auth/session', {
+        latency: 0,
+        mock: () => {
+          const user = sessionUser();
+          if (user && user.status !== 'active') { db.session.userId = null; save(); return { user: null }; }
+          return { user };
+        }
+      })
     },
 
     users: {
@@ -2097,6 +2185,136 @@
         const l = db.lectures.find(x => x.id === lectureId);
         return T.api.quizzes.generate({ courseId: l && l.courseId, lectureIds: [lectureId], source: 'ai', count: options.count || 10, difficulty: options.difficulty || 'medium', types: options.types || ['mcq', 'true_false'], explanations: true });
       }
+    },
+
+    /**
+     * Admin console (pages/admin/dashboard.html). Every method answers 403
+     * unless the signed-in user's role is 'admin' — PHP checks the role in
+     * MySQL on each request. Admins get account details and COUNTS only:
+     * never chat messages, notes, lecture text or quiz answers.
+     */
+    admin: {
+      /**
+       * GET /api/admin/summary → api/admin/summary.php
+       * { students, newStudents30d, deactivated, activeUsers, activeWindowDays,
+       *   courses, archivedCourses, lectures, lecturesByStatus: { ready, inProgress, failed } }
+       * activeUsers = active student accounts that signed in or had any
+       * activity in the last 7 days.
+       */
+      summary: () => request('GET', '/admin/summary', {
+        mock: () => {
+          const denied = requireAdmin(); if (denied) return denied;
+          const students = db.users.filter(u => u.role === 'student');
+          const since = (days) => new Date(Date.now() - days * 86400000).toISOString();
+          const active = students.filter(u => u.status === 'active' && lastActiveAt(u) >= since(7));
+          const lectures = db.lectures;
+          return {
+            students: students.length,
+            newStudents30d: students.filter(u => u.createdAt >= since(30)).length,
+            deactivated: students.filter(u => u.status !== 'active').length,
+            activeUsers: active.length,
+            activeWindowDays: 7,
+            courses: db.courses.length,
+            archivedCourses: db.courses.filter(c => c.status === 'archived').length,
+            lectures: lectures.length,
+            lecturesByStatus: {
+              ready: lectures.filter(l => l.status === 'ready').length,
+              inProgress: lectures.filter(l => PIPELINE.includes(l.status)).length,
+              failed: lectures.filter(l => l.status === 'failed').length
+            }
+          };
+        }
+      }),
+
+      /**
+       * GET /api/admin/users?q=&status= → api/admin/users.php
+       * Student accounts with usage COUNTS (courses, lectures, quizzes taken,
+       * AI Tutor conversations) — never their content. Newest accounts first.
+       */
+      users: ({ q = '', status = '' } = {}) => request('GET', `/admin/users?${new URLSearchParams(Object.entries({ q, status }).filter(([, v]) => v))}`, {
+        mock: () => {
+          const denied = requireAdmin(); if (denied) return denied;
+          const term = str(q).toLowerCase();
+          return db.users
+            .filter(u => u.role === 'student')
+            .filter(u => !status || u.status === status)
+            .filter(u => !term || `${u.firstName} ${u.lastName} ${u.email}`.toLowerCase().includes(term))
+            .sort(byNewest('createdAt'))
+            .map(adminUserRow);
+        }
+      }),
+
+      /**
+       * PATCH /api/admin/users/{id}/status → api/admin/user-status.php
+       * body: { status: 'active'|'deactivated', reason } — reason required (5–300 chars),
+       * stored in admin_actions with the admin's id. Deactivated students can't
+       * sign in and their open sessions end. 403 · 404 · 409 (already in that state) · 422
+       */
+      setUserStatus: (id, { status, reason } = {}) => request('PATCH', `/admin/users/${encodeURIComponent(id)}/status`, {
+        body: { status, reason },
+        mock: () => {
+          const denied = requireAdmin(); if (denied) return denied;
+          const user = db.users.find(u => u.id === id && u.role === 'student');
+          if (!user) return notFound('Student', id);
+          const why = str(reason);
+          const errors = {};
+          if (!['active', 'deactivated'].includes(status)) errors.status = 'Choose activate or deactivate.';
+          if (!why) errors.reason = 'Give a reason for this change.';
+          else if (why.length < 5) errors.reason = 'Use at least 5 characters.';
+          else if (why.length > 300) errors.reason = 'Use 300 characters or fewer.';
+          if (Object.keys(errors).length) return invalid('Check the highlighted fields.', errors);
+          if (user.status === status) return invalid(`This account is already ${status}.`, {}, 409);
+          const from = user.status;
+          user.status = status;
+          user.statusChangedAt = nowIso();
+          db.adminActions.push({ id: nextId('adm', db.adminActions), adminId: me(), userId: id, action: status === 'active' ? 'activate' : 'deactivate', fromStatus: from, toStatus: status, reason: why, createdAt: user.statusChangedAt });
+          if (status !== 'active' && db.session.userId === id) db.session.userId = null;
+          return adminUserRow(user);
+        }
+      }),
+
+      /**
+       * GET /api/admin/lectures → api/admin/lectures.php
+       * Processing pipeline across all students: counts per status, plus the
+       * uploads still processing and recent failures (title, size, course code,
+       * student — never the lecture text).
+       */
+      lectures: () => request('GET', '/admin/lectures', {
+        mock: () => {
+          const denied = requireAdmin(); if (denied) return denied;
+          const counts = Object.fromEntries(LECTURE_STATUSES.map(st => [st, db.lectures.filter(l => l.status === st).length]));
+          const items = db.lectures
+            .filter(l => l.status !== 'ready')
+            .sort(byNewest('uploadedAt'))
+            .slice(0, 20)
+            .map(l => {
+              const course = db.courses.find(c => c.id === l.courseId);
+              const owner = course && userById(course.userId);
+              return { id: l.id, title: l.title, status: l.status, fileSizeKb: l.fileSizeKb, uploadedAt: l.uploadedAt, course: course ? { id: course.id, code: course.code } : null, student: owner ? { id: owner.id, name: fullName(owner) } : null };
+            });
+          return { counts, items };
+        }
+      }),
+
+      /**
+       * GET /api/admin/activity?limit= → api/admin/activity.php
+       * Recent events across all students as generic labels ("Asked the AI
+       * Tutor", "Submitted a quiz") — no message text, scores or answers.
+       */
+      activity: ({ limit = 12 } = {}) => request('GET', `/admin/activity?limit=${limit}`, {
+        mock: () => {
+          const denied = requireAdmin(); if (denied) return denied;
+          return db.activity
+            .filter(a => (userById(a.userId) || {}).role === 'student')
+            .sort(byNewest('createdAt'))
+            .slice(0, Math.min(50, limit))
+            .map(a => {
+              const u = userById(a.userId);
+              const course = a.courseId && db.courses.find(c => c.id === a.courseId);
+              return { id: a.id, type: a.type, label: ADMIN_ACTIVITY_LABEL[a.type] || 'Activity', createdAt: a.createdAt, student: { id: u.id, name: fullName(u) }, course: course ? { code: course.code } : null };
+            });
+        }
+      })
     },
 
     settings: {

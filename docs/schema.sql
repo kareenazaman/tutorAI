@@ -8,15 +8,17 @@
 --     the frontend expects:  users.id 1001 → "usr_1001", courses.id → "crs_…",
 --     lectures "lec_", quizzes "qz_", questions "q_", attempts "att_",
 --     conversations "conv_", messages "msg_", activity_log "act_",
---     notifications "ntf_", summaries "sum_", notes "note_".
+--     notifications "ntf_", summaries "sum_", notes "note_", admin_actions "adm_".
 --   • Columns are snake_case; PHP converts to camelCase in responses
 --     (first_name → firstName).
 --   • Times are stored in UTC (DATETIME(3)) and returned as ISO-8601.
 --   • Calculated values (course progress/mastery, quiz status, best score,
 --     topic averages, streaks) are NEVER stored — the API computes them from
 --     attempts and attempt_answers, exactly as api.js does.
---   • Every query in PHP filters by the session's user_id (ownership), so
---     one student can never read another student's rows.
+--   • Every student query in PHP filters by the session's user_id (ownership),
+--     so one student can never read another student's rows. Admin endpoints
+--     (role = 'admin') read accounts and COUNT(*)s only — never messages,
+--     notes, lecture_pages or attempt_answers.
 -- =============================================================================
 
 SET NAMES utf8mb4;
@@ -26,12 +28,14 @@ CREATE DATABASE IF NOT EXISTS tutorai CHARACTER SET utf8mb4 COLLATE utf8mb4_unic
 USE tutorai;
 
 -- -----------------------------------------------------------------------------
--- users — students. role is kept for future use; the app only creates 'student'.
--- password_hash comes from PHP password_hash(); the plain password is never stored.
+-- users — students and admins. Sign-up only ever creates 'student'; admins are
+-- created by hand (or a seed script). role is checked by PHP on every
+-- /api/admin/* request. password_hash comes from PHP password_hash(); the plain
+-- password is never stored. Deactivated accounts can't sign in.
 -- -----------------------------------------------------------------------------
 CREATE TABLE users (
   id              INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  role            ENUM('student') NOT NULL DEFAULT 'student',
+  role            ENUM('student','admin') NOT NULL DEFAULT 'student',
   first_name      VARCHAR(60)  NOT NULL,
   last_name       VARCHAR(60)  NOT NULL DEFAULT '',
   email           VARCHAR(254) NOT NULL,
@@ -41,13 +45,36 @@ CREATE TABLE users (
   year_of_study   TINYINT UNSIGNED NULL,                 -- 1–5, 6 = graduate
   bio             VARCHAR(280) NOT NULL DEFAULT '',
   avatar_url      VARCHAR(500) NULL,
+  title           VARCHAR(80)  NULL,                    -- admins: e.g. 'Platform Owner'
   avatar_color    ENUM('lavender','powder','sage','butter','pink','peach') NOT NULL DEFAULT 'lavender',
-  status          ENUM('active','suspended') NOT NULL DEFAULT 'active',
+  status          ENUM('active','deactivated') NOT NULL DEFAULT 'active',
+  status_changed_at DATETIME(3) NULL,
   created_at      DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   last_login_at   DATETIME(3)  NULL,
   PRIMARY KEY (id),
-  UNIQUE KEY uq_users_email (email)
+  UNIQUE KEY uq_users_email (email),
+  KEY idx_users_role_status (role, status, created_at)
 ) ENGINE=InnoDB AUTO_INCREMENT=1001;
+
+-- -----------------------------------------------------------------------------
+-- admin_actions — audit log for the admin console. Every activate/deactivate
+-- records who did it and the required reason. Kept if the admin is removed.
+-- -----------------------------------------------------------------------------
+CREATE TABLE admin_actions (
+  id              INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  admin_id        INT UNSIGNED NULL,
+  user_id         INT UNSIGNED NOT NULL,
+  action          ENUM('activate','deactivate') NOT NULL,
+  from_status     ENUM('active','deactivated') NOT NULL,
+  to_status       ENUM('active','deactivated') NOT NULL,
+  reason          VARCHAR(300) NOT NULL,
+  created_at      DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (id),
+  KEY idx_admin_actions_user (user_id, created_at),
+  KEY idx_admin_actions_admin (admin_id, created_at),
+  CONSTRAINT fk_admin_actions_admin FOREIGN KEY (admin_id) REFERENCES users (id) ON DELETE SET NULL,
+  CONSTRAINT fk_admin_actions_user  FOREIGN KEY (user_id)  REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
 -- Password reset links: only a SHA-256 hash of the emailed token is stored.
 CREATE TABLE password_resets (
