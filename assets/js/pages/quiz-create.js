@@ -141,7 +141,16 @@ document.addEventListener('tutorai:ready', async () => {
     const box = $('[data-lectures]', root);
     if (!courseId) { lectures = []; box.innerHTML = '<p class="tai-meta mb-0">Choose a course to see its lectures.</p>'; return; }
     box.innerHTML = T.ui.skeleton('text', 2);
-    lectures = (await T.api.lectures.list(courseId)).sort((a, b) => (a.lectureNumber || 999) - (b.lectureNumber || 999));
+    try {
+      lectures = (await T.api.lectures.list(courseId)).sort((a, b) => (a.lectureNumber || 999) - (b.lectureNumber || 999));
+    } catch (err) {
+      lectures = [];
+      box.innerHTML = T.ui.emptyState({ icon: 'circle-alert', tone: 'pink', compact: true, title: 'Couldn’t load this course’s lectures', text: err.message });
+      box.insertAdjacentHTML('beforeend', '<button type="button" class="btn btn-secondary btn-sm mt-2" data-retry-lectures>Try again</button>');
+      box.querySelector('[data-retry-lectures]').addEventListener('click', () => loadLectures(courseId, preselect));
+      T.ui.icons(box);
+      return;
+    }
     if (!ready().length) {
       box.innerHTML = T.ui.emptyState({ icon: 'file-up', tone: 'butter', compact: true, title: 'No ready lectures in this course', text: 'Quizzes are written from lecture pages. Upload a lecture PDF first.', actions: [{ label: 'Upload a lecture', icon: 'upload', href: UI.uploadUrl(courseId) }] });
       T.ui.icons(box);

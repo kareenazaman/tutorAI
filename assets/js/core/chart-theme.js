@@ -13,7 +13,7 @@
     series: ['#18181B', '#8B78D6', '#5B93D3', '#4FA67A', '#E0788A', '#E3B21B'],
     fills:  ['#E9E3FA', '#DCEBFB', '#D8F0E3', '#FBE1E4', '#FFF1B8', '#FFE4D1'],
     grid:   '#EFEFEC',
-    text:   '#6B6B76',
+    text:   '#5F5F69',
     ink:    '#18181B'
   };
 

@@ -13,10 +13,6 @@
  *   data-title="…"         override the topbar title
  *   data-search="false"    hide the topbar search control
  *
- * Optional <main> attributes
- *   data-placeholder        render a "coming soon" empty state
- *   data-stage="3"          stage number shown in that placeholder
- *
  * Pages can wait for the shell with:
  *   document.addEventListener('tutorai:ready', e => { e.detail.user … })
  *
@@ -65,29 +61,9 @@
     $('.tai-main', app).appendChild(content);
     body.prepend(app);
 
-    if (content.hasAttribute('data-placeholder')) renderPlaceholder(content, title);
-
     if (title && !document.title.includes(title)) {
       document.title = `${title} · TutorAI`;
     }
-  }
-
-  function renderPlaceholder(content, title) {
-    const stage = content.dataset.stage;
-    const home = T.navigation[role].home;
-    content.innerHTML = `
-      ${T.ui.pageHeader({ eyebrow: 'Workspace', title })}
-      <div class="tai-card">
-        ${T.ui.emptyState({
-          icon: (T.navigation.find(role, document.body.dataset.page) || { item: { icon: 'layout-dashboard' } }).item.icon,
-          title: `${title} is on its way`,
-          text: `This page shares the TutorAI shell and design system. Its content will be built${stage ? ` in stage ${stage}` : ' in a later stage'}.`,
-          actions: [
-            { label: 'Back to dashboard', href: T.utils.url(home), variant: 'secondary' },
-            { label: 'View design system', href: T.utils.url('pages/styleguide.html'), variant: 'soft', icon: 'palette' }
-          ]
-        })}
-      </div>`;
   }
 
   /* ---- Sidebar state ------------------------------------------------------ */

@@ -18,7 +18,7 @@ document.addEventListener('tutorai:ready', async () => {
   const params = new URLSearchParams(window.location.search);
   const RANGES = { '7d': 'Last 7 days', '30d': 'Last 30 days', term: 'This term' };
   const state = { course: params.get('course') || '', range: RANGES[params.get('range')] ? params.get('range') : '30d' };
-  const C = T.chartColors || { series: ['#18181B'], fills: ['#E9E3FA'], grid: '#EFEFEC', text: '#6B6B76', ink: '#18181B' };
+  const C = T.chartColors || { series: ['#18181B'], fills: ['#E9E3FA'], grid: '#EFEFEC', text: '#5F5F69', ink: '#18181B' };
   const PASTEL = { lavender: ['#8B78D6', '#E9E3FA'], powder: ['#5B93D3', '#DCEBFB'], sage: ['#4FA67A', '#D8F0E3'], butter: ['#C99A00', '#FFF1B8'], pink: ['#E0788A', '#FBE1E4'], peach: ['#D9824B', '#FFE4D1'] };
   const BAND = { strong: { label: 'Strong', fill: '#B9E3CB', line: '#1E5B3E', tone: 'sage' }, okay: { label: 'Okay', fill: '#FFE58A', line: '#6B4F00', tone: 'butter' }, revise: { label: 'Revise', fill: '#F6C1C9', line: '#8A2E3E', tone: 'pink' } };
   const ACTIVITY = { quiz_submitted: ['Quizzes', '#18181B'], lecture_viewed: ['Lectures read', '#8B78D6'], chat_message: ['AI Tutor', '#5B93D3'], lecture_uploaded: ['Uploads', '#4FA67A'], notes_generated: ['Notes', '#E3B21B'] };
@@ -145,7 +145,7 @@ document.addEventListener('tutorai:ready', async () => {
     if (!topics.length) return emptyChart('topics', 'Topics appear here once you’ve answered quiz questions on them.');
     const sorted = topics.slice().sort((a, b) => b.average - a.average);
     const box = $('[data-chart="topics"]', root);
-    box.style.height = `${Math.max(220, sorted.length * 34 + 70)}px`;
+    box.style.height = `${Math.max(220, sorted.length * (state.course ? 34 : 46) + 70)}px`;
     charts.push(new Chart(canvas('topics', 'Horizontal bar chart of topic averages, strongest first'), {
       type: 'bar',
       data: {
@@ -154,7 +154,16 @@ document.addEventListener('tutorai:ready', async () => {
       },
       options: {
         indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-        scales: { x: { min: 0, max: 100, ticks: { callback: v => `${v}%` } }, y: { grid: { display: false } } },
+        scales: {
+          x: { min: 0, max: 100, ticks: { callback: v => `${v}%` } },
+          // Long topic names are shortened on the axis (full name in the tooltip and data table)
+          // Topic on line 1, course on line 2; long topics shortened (full name in tooltip and data table)
+          y: { grid: { display: false }, ticks: { callback(v) {
+            const t = sorted[v]; const max = this.chart.width < 520 ? 18 : 28;
+            const name = t.topic.length > max ? `${t.topic.slice(0, max - 1).trimEnd()}…` : t.topic;
+            return state.course ? name : [name, t.code];
+          } } }
+        },
         plugins: {
           legend: { display: true, position: 'bottom', labels: { generateLabels: () => Object.values(BAND).map(b => ({ text: `${b.label}${b === BAND.strong ? ' ≥ 80' : b === BAND.okay ? ' 65–79' : ' < 65'}`, fillStyle: b.fill, strokeStyle: b.line, lineWidth: 1.5 })) } },
           tooltip: { callbacks: { label: (ctx) => { const t = sorted[ctx.dataIndex]; return `${t.average}% average · ${t.attempts} attempt${t.attempts === 1 ? '' : 's'} · ${BAND[t.band].label}`; } } }

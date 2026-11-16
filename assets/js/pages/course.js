@@ -537,8 +537,6 @@ document.addEventListener('tutorai:ready', async () => {
       lectureQuery = '';
       renderPanel();
       document.getElementById('lecture-search').focus();
-    } else if (action.dataset.action === 'open-quiz') {
-      T.ui.toast({ title: action.dataset.title, message: 'The quiz player arrives with the Quizzes stage. Your scores here are sample data.', variant: 'info' });
     }
   });
 

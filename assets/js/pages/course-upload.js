@@ -123,12 +123,13 @@ document.addEventListener('tutorai:ready', async () => {
   /** "COMP3610-L06-rest-apis.pdf" → { title: 'Rest apis', number: '6' } */
   function guessFromName(name) {
     const base = name.replace(/\.pdf$/i, '');
-    const numMatch = base.match(/(?:^|[^a-z0-9])(?:l|lec|lecture|week|wk|w)[\s_-]?0*(\d{1,3})(?![0-9])/i);
+    const numMatch = base.match(/(?:^|[^a-z0-9])(?:l|lec|lecture|week|wk|w)[\s_-]?0*(\d{1,3})(?![0-9])/i) ||
+      base.match(/^0*(\d{1,2})[\s_.-]+(?=[a-z])/i);   // a leading number: "01 Intro to SQL.pdf"
     const words = base.split(/[\s_\-.]+/).filter(Boolean).filter(w =>
       !/^[a-z]{2,5}\d{3,4}[a-z]?$/i.test(w) &&                  // course code, e.g. COMP3610
       !/^(l|lec|lecture|week|wk|w)?0*\d{1,3}$/i.test(w) &&        // L06, 06, week3
       !/^(lecture|lec|week|slides?|notes?|final|v\d+)$/i.test(w));
-    let title = (words.length ? words : [base]).join(' ').trim();
+    let title = (words.length ? words : base.split(/[\s_\-.]+/).filter(Boolean)).join(' ').trim();
     title = title.charAt(0).toUpperCase() + title.slice(1);
     return { title: title.slice(0, 150), number: numMatch ? String(parseInt(numMatch[1], 10)) : '' };
   }
@@ -279,7 +280,8 @@ document.addEventListener('tutorai:ready', async () => {
           lectureNumber: values.lecture_number === '' ? null : Number(values.lecture_number),
           description: values.description.trim(),
           fileName: file.name,
-          fileSizeKb: file.size / 1024
+          fileSizeKb: file.size / 1024,
+          file                                   // sent as lecture_file (multipart) to the real API
         });
       } catch (err) {
         T.ui.setButtonLoading(submitBtn, false);

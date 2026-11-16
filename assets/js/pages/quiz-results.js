@@ -43,12 +43,13 @@ document.addEventListener('tutorai:ready', async () => {
   const flagged = new Set(attempt.flagged || []);
   const correctCount = attempt.perQuestion.filter(r => r.correct).length;
   const partialCount = attempt.perQuestion.filter(r => !r.correct && r.points > 0).length;
-  const wrongCount = attempt.total - correctCount - partialCount;
+  const unansweredCount = attempt.perQuestion.filter(r => !r.answered).length;
+  const wrongCount = attempt.total - correctCount - partialCount - unansweredCount;
   const seconds = Math.round((new Date(attempt.submittedAt) - new Date(attempt.startedAt)) / 1000);
   const fmtTime = (s) => (s >= 3600 ? `${Math.floor(s / 3600)}h ${Math.round((s % 3600) / 60)}m` : `${Math.floor(s / 60)}m ${s % 60}s`);
   const fmtScore = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
-  const auto = T.utils.session.get('tai.quiz.autoSubmitted') === attempt.id;
-  if (auto) T.utils.session.remove('tai.quiz.autoSubmitted');
+  // Timed quizzes: submitted at (or after) the deadline means the timer submitted it
+  const auto = !!(attempt.deadlineAt && attempt.submittedAt && attempt.submittedAt >= attempt.deadlineAt);
 
   T.shell.setCrumbs([{ label: 'Quizzes', href: url('pages/student/quizzes.html') }, { label: quiz.title }, { label: 'Results' }]);
   document.title = `Results: ${quiz.title} · TutorAI`;
@@ -71,7 +72,7 @@ document.addEventListener('tutorai:ready', async () => {
             <span class="qr-hero__percent" data-count-to="${attempt.percent}" data-count-suffix="%">0%</span>
             <div>
               <p class="qr-hero__line">${fmtScore(attempt.score)} / ${attempt.total} points</p>
-              <p class="tai-tile__meta mb-0">${band === 'strong' ? 'Strong — ' : band === 'okay' ? 'Okay — ' : 'Worth revising — '}${correctCount} correct${partialCount ? `, ${partialCount} partly correct` : ''}, ${wrongCount} incorrect</p>
+              <p class="tai-tile__meta mb-0">${band === 'strong' ? 'Strong — ' : band === 'okay' ? 'Okay — ' : 'Worth revising — '}${correctCount} correct${partialCount ? `, ${partialCount} partly correct` : ''}, ${wrongCount} incorrect${unansweredCount ? `, ${unansweredCount} not answered` : ''}</p>
             </div>
           </div>
           <div class="tai-hero__meta">

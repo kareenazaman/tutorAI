@@ -72,7 +72,7 @@
     });
 
     const SW = [
-      ['White', '#FFFFFF'], ['Ink black', '#18181B'], ['Gray 50', '#F7F7F5'], ['Border', '#ECECE8'], ['Muted text', '#6B6B76'], ['Faint text', '#A1A1AA'],
+      ['White', '#FFFFFF'], ['Ink black', '#18181B'], ['Gray 50', '#F7F7F5'], ['Border', '#ECECE8'], ['Muted text', '#5F5F69'], ['Faint text', '#6E6E78'],
       ['Lavender', '#E9E3FA', '#3B2A75'], ['Powder blue', '#DCEBFB', '#1F4A7A'], ['Mint', '#D8F0E3', '#1E5B3E'],
       ['Pink', '#FBE1E4', '#8A2E3E'], ['Butter', '#FFF1B8', '#6B4F00'], ['Peach', '#FFE4D1', '#8A3F12']
     ];

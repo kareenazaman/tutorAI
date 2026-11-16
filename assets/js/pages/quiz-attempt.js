@@ -153,26 +153,32 @@ document.addEventListener('tutorai:ready', async () => {
 
   /* ---- Saving ------------------------------------------------------------------ */
   const savedEl = () => $('[data-saved]', root);
+  // Change counters: the leave-page warning shows only while a change isn't saved yet
+  let changeVersion = 0;
+  let savedVersion = 0;
+  const hasUnsaved = () => savedVersion < changeVersion;
   async function save() {
     clearTimeout(saveTimer);
     if (submitting) return;
+    const version = changeVersion;
     savedEl().textContent = 'Saving…';
     try {
       await T.api.attempts.save(attempt.id, { answers, currentIndex: index, flagged: [...flagged] });
-      savedEl().textContent = 'Saved';
+      savedVersion = Math.max(savedVersion, version);
+      savedEl().textContent = hasUnsaved() ? 'Saving…' : 'Saved';
     } catch (err) {
       savedEl().textContent = 'Not saved';
       if (err.status === 409) { leaving = true; window.location.href = url(`pages/student/quiz-results.html?attempt=${encodeURIComponent(attempt.id)}`); }
     }
   }
-  const saveSoon = (ms = 400) => { clearTimeout(saveTimer); savedEl().textContent = 'Saving…'; saveTimer = setTimeout(save, ms); };
+  const saveSoon = (ms = 400) => { changeVersion++; clearTimeout(saveTimer); savedEl().textContent = 'Saving…'; saveTimer = setTimeout(save, ms); };
 
   /* ---- Navigation & answers ---------------------------------------------------- */
   function go(i) {
     if (i < 0 || i >= quiz.questions.length || i === index) return;
     index = i;
     renderQuestion({ focus: true });
-    save();
+    changeVersion++; save();
   }
 
   function choose(optionId) {
@@ -191,7 +197,7 @@ document.addEventListener('tutorai:ready', async () => {
       inp.checked = on; l.classList.toggle('is-selected', on);
     });
     renderChrome();
-    save();
+    changeVersion++; save();
   }
 
   root.addEventListener('change', (e) => {
@@ -222,7 +228,7 @@ document.addEventListener('tutorai:ready', async () => {
       a.querySelector('span').textContent = flagged.has(q.id) ? 'Flagged' : 'Flag for review';
       renderChrome();
       announce(flagged.has(q.id) ? `Question ${index + 1} flagged for review.` : `Flag removed from question ${index + 1}.`);
-      save();
+      changeVersion++; save();
     } else if (act === 'submit') confirmSubmit();
     else if (act === 'exit') exit();
   });
@@ -250,7 +256,6 @@ document.addEventListener('tutorai:ready', async () => {
       await T.api.attempts.save(attempt.id, { answers, currentIndex: index, flagged: [...flagged] }).catch(() => {});
       const r = await T.api.attempts.submit(attempt.id);
       leaving = true;
-      if (auto) T.utils.session.set('tai.quiz.autoSubmitted', attempt.id);
       window.location.href = url(`pages/student/quiz-results.html?attempt=${encodeURIComponent(r.id)}`);
     } catch (err) {
       submitting = false;
@@ -278,8 +283,9 @@ document.addEventListener('tutorai:ready', async () => {
     window.location.href = url('pages/student/quizzes.html');
   }
 
+  // Warn only while a save is pending or failed; everything else is already stored
   window.addEventListener('beforeunload', (e) => {
-    if (leaving || submitting) return;
+    if (leaving || submitting || !hasUnsaved()) return;
     save();
     e.preventDefault();
     e.returnValue = '';

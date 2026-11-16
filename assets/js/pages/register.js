@@ -53,10 +53,6 @@ document.addEventListener('tutorai:ready', () => {
     }
   });
 
-  formEl.querySelectorAll('[data-terms]').forEach(a => a.addEventListener('click', (e) => {
-    e.preventDefault();
-    T.ui.toast({ title: 'Coming soon', message: 'The Terms of Use and Privacy Policy pages will be added before launch.' });
-  }));
 
   formEl.elements.full_name.focus();
 });

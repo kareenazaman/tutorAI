@@ -56,7 +56,8 @@ a:hover { color: var(--tai-text-muted); }
 ::selection { background: var(--tai-lavender); color: var(--tai-charcoal); }
 
 :focus-visible {
-  outline: none;
+  outline: 2px solid transparent;   /* becomes visible in Windows high-contrast mode, where box-shadow is removed */
+  outline-offset: 2px;
   box-shadow: var(--tai-focus-ring);
   border-radius: var(--tai-radius-xs);
 }

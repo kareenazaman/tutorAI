@@ -155,8 +155,9 @@
       response = await fetch(base + path, {
         method,
         credentials: 'include',            // PHP session cookie
-        headers: { 'Accept': 'application/json', ...(body ? { 'Content-Type': 'application/json' } : {}) },
-        body: body ? JSON.stringify(body) : undefined
+        // FormData (file uploads) goes as multipart/form-data — the browser sets the boundary header
+        headers: { 'Accept': 'application/json', ...(body && !(body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}) },
+        body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined
       });
     } catch (networkError) {
       throw new ApiError('Network error — please check your connection.', 0, networkError);
@@ -167,6 +168,13 @@
     }
     // Backend envelope: { success: true, data: … }
     return data && Object.prototype.hasOwnProperty.call(data, 'data') ? data.data : data;
+  }
+
+  /** { key: value } → FormData for multipart uploads (null/undefined values are skipped). */
+  function multipart(fields) {
+    const fd = new FormData();
+    Object.entries(fields).forEach(([k, v]) => { if (v !== undefined && v !== null) fd.append(k, v); });
+    return fd;
   }
 
   /** Route a request to mock or HTTP. */
@@ -1261,12 +1269,13 @@
 
       /**
        * POST /api/courses/{courseId}/lectures → api/lectures/upload.php
-       * multipart/form-data: file, title, lecture_number, description
+       * multipart/form-data: lecture_file, title, lecture_number, description
        * Mock: receives file metadata only — the file is never read or stored.
        * 201 → lecture with status 'uploading' · 404 · 409 (number taken) · 413 (too large) · 422
        */
       create: (courseId, data = {}) => request('POST', `/courses/${encodeURIComponent(courseId)}/lectures`, {
-        body: data,
+        // Real API: multipart/form-data with the PDF, field names as upload.php reads them from $_POST/$_FILES
+        body: cfg.useMockData ? null : multipart({ lecture_file: data.file, title: data.title, lecture_number: data.lectureNumber ?? '', description: data.description || '' }),
         mock: () => {
           const course = findCourse(courseId);
           if (!course) return notFound('Course', courseId);

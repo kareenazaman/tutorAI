@@ -74,7 +74,7 @@
         <div class="tai-field">
           <div class="form-check">
             <input class="form-check-input" type="checkbox" id="register-terms" name="terms" value="1" required>
-            <label class="form-check-label" for="register-terms">I agree to the <a class="tai-auth__link" href="#" data-terms>Terms of Use</a> and <a class="tai-auth__link" href="#" data-terms>Privacy Policy</a></label>
+            <label class="form-check-label" for="register-terms">I agree to the <button type="button" class="btn btn-link p-0 align-baseline tai-auth__link" data-bs-toggle="modal" data-bs-target="#terms-modal">Terms of Use</button> and <button type="button" class="btn btn-link p-0 align-baseline tai-auth__link" data-bs-toggle="modal" data-bs-target="#terms-modal">Privacy Policy</button></label>
           </div>
         </div>
 
@@ -89,6 +89,40 @@
       <h2 class="h4 mb-2">Welcome, <span data-new-name>there</span>!</h2>
       <p class="tai-meta">Your account is ready and you’re signed in. Start by adding a course, then upload a lecture PDF.</p>
       <a class="btn btn-primary btn-lg w-100 mt-2" href="../student/dashboard.html"><span>Continue to dashboard</span><i data-lucide="arrow-right"></i></a>
+    </div>
+
+    <!-- Terms & privacy summary (demo). The full legal text is written before launch. -->
+    <div class="modal fade" id="terms-modal" tabindex="-1" aria-labelledby="terms-title" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width:560px">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div>
+              <h2 class="modal-title" id="terms-title">Terms of Use &amp; Privacy</h2>
+              <p class="modal-subtitle"><span class="tai-badge tai-badge--outline tai-badge--sm">Demo</span> A plain-language summary for this student project.</p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="tai-prose mt-3">
+            <h3 class="h6">Using TutorAI</h3>
+            <ul>
+              <li>Upload only lecture material you’re allowed to use for your own study.</li>
+              <li>AI answers come from your lecture text but can still be wrong — check important points against your course.</li>
+              <li>Don’t use TutorAI to complete graded work where your course doesn’t allow AI help.</li>
+            </ul>
+            <h3 class="h6">Your data</h3>
+            <ul>
+              <li>We store your profile, courses, lecture text, quiz results and AI Tutor chats so the app can work.</li>
+              <li>Passwords are stored only as secure hashes on the server, never in your browser.</li>
+              <li>Lecture text is sent to the AI service only to answer your questions; it isn’t shared with other students.</li>
+              <li>You can download all your data or delete your account at any time in Settings.</li>
+            </ul>
+            <p class="tai-meta mb-0">In this demo nothing leaves your browser: data is kept in a local sample store.</p>
+          </div>
+          <div class="modal-footer mt-4">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it</button>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 

@@ -13,8 +13,8 @@
   --tai-gray-100:     #EFEFEC;   /* tracks, pressed states                   */
   --tai-border:       #ECECE8;
   --tai-border-strong:#DCDCD6;
-  --tai-text-muted:   #6B6B76;
-  --tai-text-faint:   #A1A1AA;
+  --tai-text-muted:   #5F5F69;   /* ≥ 5:1 on white and every pastel (was #6B6B76) */
+  --tai-text-faint:   #6E6E78;   /* ≥ 4.5:1 on white and the sidebar grey (was #A1A1AA, 2.4:1) */
 
   /* ---- Pastels: used as BIG blocks (tiles, cards), not tiny accents ----- */
   --tai-lavender:     #E9E3FA;   --tai-lavender-ink: #3B2A75;
