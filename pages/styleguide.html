@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Design System · TutorAI</title>
+  <link rel="icon" href="../assets/img/logo-mark.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../assets/css/main.css" rel="stylesheet">
+</head>
+<body class="page-styleguide" data-shell="student" data-page="styleguide" data-title="Design System" data-root="../">
+
+<main id="page-content">
+
+  <header class="tai-page-header">
+    <div>
+      <span class="tai-eyebrow">TutorAI · v0.1</span>
+      <h1 class="tai-page-header__title">Design <em class="fst-italic text-lavender-ink">system</em></h1>
+      <p class="tai-page-header__subtitle">Every reusable style and component in one place. Build new pages from these pieces, not from scratch.</p>
+    </div>
+    <div class="tai-page-header__actions">
+      <a class="btn btn-secondary" href="admin/dashboard.html"><i data-lucide="shield-check"></i><span>Admin shell</span></a>
+      <a class="btn btn-primary" href="student/dashboard.html"><i data-lucide="graduation-cap"></i><span>Student shell</span></a>
+    </div>
+  </header>
+
+  <!-- Colour -->
+  <section class="sg-block" id="colour">
+    <h2>Colour</h2>
+    <p class="sg-desc">White canvas and near-black ink do the structural work. Pastels are used as big, confident blocks, each with a deep ink tone for text on top.</p>
+    <div class="row g-3" id="sg-swatches"></div>
+  </section>
+
+  <!-- Typography -->
+  <section class="sg-block" id="typography">
+    <h2>Typography</h2>
+    <p class="sg-desc">DM Serif Display for editorial moments (page titles, hero lines, empty states). Inter for everything else.</p>
+    <div class="tai-card">
+      <div class="sg-type-row"><span class="tai-meta">Display · 48</span><span class="tai-display" style="font-size:var(--tai-fs-4xl)">Learn. Practise. <em>Improve.</em></span></div>
+      <div class="sg-type-row"><span class="tai-meta">Page title · 36</span><span class="tai-display" style="font-size:var(--tai-fs-3xl)">Good evening, Maya</span></div>
+      <div class="sg-type-row"><span class="tai-meta">H3 · Inter 28</span><span class="h3 mb-0">Your study plan this week</span></div>
+      <div class="sg-type-row"><span class="tai-meta">H4 · Inter 22</span><span class="h4 mb-0">Database Systems</span></div>
+      <div class="sg-type-row"><span class="tai-meta">H5 · Inter 18</span><span class="h5 mb-0">Recent documents</span></div>
+      <div class="sg-type-row"><span class="tai-meta">Lead · 18</span><span class="tai-lead">Upload your lecture notes and TutorAI turns them into explanations and practice quizzes.</span></div>
+      <div class="sg-type-row"><span class="tai-meta">Body · 15</span><span>Normalization reduces redundancy by splitting tables so each fact is stored once. Line height 1.6 keeps longer explanations comfortable to read.</span></div>
+      <div class="sg-type-row"><span class="tai-meta">Meta · 13</span><span class="tai-meta">Updated 2 hours ago · 12 documents</span></div>
+      <div class="sg-type-row"><span class="tai-meta">Eyebrow · 11</span><span class="tai-eyebrow">Workspace</span></div>
+    </div>
+  </section>
+
+  <!-- Buttons -->
+  <section class="sg-block" id="buttons">
+    <h2>Buttons</h2>
+    <p class="sg-desc">One primary action per view. Soft is for AI actions and secondary emphasis.</p>
+    <div class="sg-row">
+      <button class="btn btn-primary"><i data-lucide="plus"></i><span>Add course</span></button>
+      <button class="btn btn-dark">Get started</button>
+      <button class="btn btn-secondary">Cancel</button>
+      <button class="btn btn-soft"><i data-lucide="sparkles"></i><span>Ask AI Tutor</span></button>
+      <button class="btn btn-ghost">Skip</button>
+      <button class="btn btn-danger"><i data-lucide="trash-2"></i><span>Delete</span></button>
+      <button class="btn btn-link">View all</button>
+    </div>
+    <p class="sg-label">Sizes, icon-only and states</p>
+    <div class="sg-row">
+      <button class="btn btn-primary btn-sm">Small</button>
+      <button class="btn btn-primary">Default</button>
+      <button class="btn btn-primary btn-lg">Large</button>
+      <button class="btn btn-secondary btn-icon" aria-label="Filter"><i data-lucide="filter"></i></button>
+      <button class="btn btn-ghost btn-icon" aria-label="More"><i data-lucide="ellipsis"></i></button>
+      <button class="btn btn-primary" disabled>Disabled</button>
+      <button class="btn btn-primary" id="sg-loading-btn"><span>Click to load</span></button>
+    </div>
+  </section>
+
+  <!-- Forms -->
+  <section class="sg-block" id="forms">
+    <h2>Inputs &amp; forms</h2>
+    <p class="sg-desc">44px minimum height for comfortable touch targets. Lavender focus ring across every control.</p>
+    <div class="tai-card">
+      <form class="row g-4" novalidate onsubmit="return false">
+        <div class="col-md-6">
+          <label class="form-label" for="sg-email">Email address</label>
+          <div class="tai-input-icon"><i data-lucide="mail"></i><input id="sg-email" type="email" class="form-control" placeholder="you@university.ca"></div>
+          <div class="form-text">Use your institution email.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="sg-course">Course</label>
+          <select id="sg-course" class="form-select"><option>Advanced Web Programming</option><option>Database Systems</option><option>Machine Learning</option></select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="sg-invalid">Student ID</label>
+          <input id="sg-invalid" class="form-control is-invalid" value="T00-12">
+          <div class="invalid-feedback">Student IDs are 9 characters, e.g. T00123456.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="sg-disabled">Institution</label>
+          <input id="sg-disabled" class="form-control" value="Thompson Rivers University" disabled>
+        </div>
+        <div class="col-12">
+          <label class="form-label" for="sg-question">Ask a question</label>
+          <textarea id="sg-question" class="form-control" placeholder="Explain the difference between 2NF and 3NF using an example…"></textarea>
+        </div>
+        <div class="col-md-6 d-flex flex-column gap-2">
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="sg-c1" checked><label class="form-check-label" for="sg-c1">Include my lecture notes</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="sg-r" id="sg-r1" checked><label class="form-check-label" for="sg-r1">Short answer</label></div>
+          <div class="form-check"><input class="form-check-input" type="radio" name="sg-r" id="sg-r2"><label class="form-check-label" for="sg-r2">Step-by-step</label></div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="sg-s1" checked><label class="form-check-label" for="sg-s1">Email me weekly progress</label></div>
+          <label class="form-label mt-3" for="sg-range">Quiz length</label>
+          <input type="range" class="form-range" id="sg-range" min="5" max="20" value="10">
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Cards -->
+  <section class="sg-block" id="cards">
+    <h2>Cards &amp; bento tiles</h2>
+    <p class="sg-desc">The signature of the app. Pastel tiles in a bento grid for dashboards, course cards with a pastel cover, and quiet white cards for lists and data. Hover anything clickable.</p>
+
+    <p class="sg-label">Greeting hero</p>
+    <div class="tai-hero mb-4">
+      <div>
+        <span class="tai-eyebrow">Sunday, Nov 15</span>
+        <h3 class="tai-hero__title">Good evening, <em>Maya</em></h3>
+        <div class="tai-hero__meta">
+          <span class="tai-chip bg-butter"><i data-lucide="flame"></i>4-day streak</span>
+          <span class="tai-chip bg-lavender"><i data-lucide="sparkles"></i>2 quizzes ready</span>
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-secondary"><i data-lucide="upload"></i><span>Upload notes</span></button>
+        <button class="btn btn-primary"><i data-lucide="play"></i><span>Start today's quiz</span></button>
+      </div>
+    </div>
+
+    <p class="sg-label">Bento grid</p>
+    <div class="tai-bento">
+      <a href="ai-tutor-demo" onclick="return false" class="tai-tile tai-tile--lavender tai-tile--interactive span-6 row-2">
+        <div class="tai-tile__top">
+          <span class="tai-tile__label"><i data-lucide="sparkles"></i>AI Tutor</span>
+          <span class="tai-tile__arrow"><i data-lucide="arrow-up-right"></i></span>
+        </div>
+        <h3 class="tai-tile__title" style="font-size:2.25rem;max-width:12ch">Stuck on normalization?</h3>
+        <p class="tai-tile__meta" style="max-width:36ch">Ask anything. Answers come from your own Database Systems notes, with sources.</p>
+        <div class="tai-tile__actions">
+          <span class="tai-chip">Explain 3NF simply</span>
+          <span class="tai-chip">Quiz me on joins</span>
+        </div>
+        <span class="tai-tile__deco"><i data-lucide="sparkles"></i></span>
+      </a>
+      <div class="tai-tile tai-tile--butter tai-tile--interactive span-3">
+        <div class="tai-tile__top"><span class="tai-tile__label"><i data-lucide="target"></i>Avg score</span><span class="tai-chip">+6%</span></div>
+        <div class="tai-tile__value" data-count-to="82" data-count-suffix="%">0%</div>
+        <p class="tai-tile__meta">Across 9 quizzes</p>
+        <span class="tai-tile__deco"><i data-lucide="target"></i></span>
+      </div>
+      <div class="tai-tile tai-tile--sage tai-tile--interactive span-3">
+        <div class="tai-tile__top"><span class="tai-tile__label"><i data-lucide="flame"></i>Streak</span><span class="tai-chip">Best 9</span></div>
+        <div class="tai-tile__value"><span data-count-to="4">0</span> <span style="font-size:1.5rem">days</span></div>
+        <p class="tai-tile__meta">Study today to keep it going</p>
+        <span class="tai-tile__deco"><i data-lucide="flame"></i></span>
+      </div>
+      <div class="tai-tile tai-tile--powder tai-tile--interactive span-3">
+        <div class="tai-tile__top"><span class="tai-tile__label"><i data-lucide="clock"></i>This week</span></div>
+        <div class="tai-tile__value" data-count-to="6.7" data-count-suffix="h">0h</div>
+        <div class="tai-meter mt-2"><span data-meter="84"></span></div>
+        <p class="tai-tile__meta mt-2">84% of your 8h goal</p>
+      </div>
+      <div class="tai-tile tai-tile--pink tai-tile--interactive span-3">
+        <div class="tai-tile__top"><span class="tai-tile__label"><i data-lucide="rotate-ccw"></i>Needs review</span><span class="tai-tile__arrow"><i data-lucide="arrow-up-right"></i></span></div>
+        <div class="tai-tile__value" data-count-to="3">0</div>
+        <p class="tai-tile__meta">Topics you missed last quiz</p>
+      </div>
+      <div class="tai-tile tai-tile--dark tai-tile--interactive span-8">
+        <div class="tai-tile__top">
+          <span class="tai-tile__label"><i data-lucide="book-open"></i>Continue learning</span>
+          <span class="tai-tile__arrow"><i data-lucide="arrow-up-right"></i></span>
+        </div>
+        <h3 class="tai-tile__title">Database Systems · Indexing &amp; B-trees</h3>
+        <div class="d-flex align-items-center gap-3 mt-2">
+          <div class="tai-meter flex-grow-1"><span data-meter="68"></span></div>
+          <span class="tai-chip">68%</span>
+        </div>
+      </div>
+      <div class="tai-tile tai-tile--peach tai-tile--interactive span-4">
+        <div class="tai-tile__top"><span class="tai-tile__label"><i data-lucide="calendar"></i>Due tomorrow</span></div>
+        <h3 class="tai-tile__title" style="font-size:1.375rem">HTTP &amp; REST fundamentals</h3>
+        <p class="tai-tile__meta">10 questions · 15 min</p>
+        <span class="tai-tile__deco"><i data-lucide="calendar"></i></span>
+      </div>
+    </div>
+
+    <p class="sg-label">Course cards</p>
+    <div class="row g-4">
+      <div class="col-md-6 col-xl-4">
+        <a href="#cards" class="tai-course-card h-100" style="--cover:var(--tai-powder);--cover-ink:var(--tai-powder-ink)">
+          <div class="tai-course-card__cover">
+            <span class="tai-chip"><i data-lucide="file-text"></i>9 docs</span>
+            <span class="tai-tile__arrow"><i data-lucide="arrow-up-right"></i></span>
+            <span class="tai-tile__deco"><i data-lucide="database"></i></span>
+          </div>
+          <div class="tai-course-card__body">
+            <div><div class="tai-course-card__code">COMP 3410</div><h3 class="tai-course-card__title">Database Systems</h3></div>
+            <div class="tai-progress-row">
+              <div class="tai-progress-row__head"><span class="tai-meta">Prof. Alan Moore</span><span class="tai-progress-row__value">54%</span></div>
+              <div class="progress progress-sm"><div class="progress-bar" data-meter="54"></div></div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-6 col-xl-4">
+        <a href="#cards" class="tai-course-card h-100" style="--cover:var(--tai-sage);--cover-ink:var(--tai-sage-ink)">
+          <div class="tai-course-card__cover">
+            <span class="tai-chip"><i data-lucide="file-text"></i>15 docs</span>
+            <span class="tai-tile__arrow"><i data-lucide="arrow-up-right"></i></span>
+            <span class="tai-tile__deco"><i data-lucide="brain"></i></span>
+          </div>
+          <div class="tai-course-card__body">
+            <div><div class="tai-course-card__code">COMP 3520</div><h3 class="tai-course-card__title">Machine Learning</h3></div>
+            <div class="tai-progress-row">
+              <div class="tai-progress-row__head"><span class="tai-meta">Dr. Sofia Lindqvist</span><span class="tai-progress-row__value">41%</span></div>
+              <div class="progress progress-sm"><div class="progress-bar" data-meter="41"></div></div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-6 col-xl-4">
+        <a href="#cards" class="tai-course-card h-100" style="--cover:var(--tai-butter);--cover-ink:var(--tai-butter-ink)">
+          <div class="tai-course-card__cover">
+            <span class="tai-chip"><i data-lucide="file-text"></i>12 docs</span>
+            <span class="tai-tile__arrow"><i data-lucide="arrow-up-right"></i></span>
+            <span class="tai-tile__deco"><i data-lucide="code"></i></span>
+          </div>
+          <div class="tai-course-card__body">
+            <div><div class="tai-course-card__code">COMP 3610</div><h3 class="tai-course-card__title">Advanced Web Programming</h3></div>
+            <div class="tai-progress-row">
+              <div class="tai-progress-row__head"><span class="tai-meta">Dr. Priya Raman</span><span class="tai-progress-row__value">68%</span></div>
+              <div class="progress progress-sm"><div class="progress-bar" data-meter="68"></div></div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <p class="sg-label">White cards: stats and lists</p>
+    <div class="row g-4">
+      <div class="col-md-6 col-xl-3">
+        <div class="tai-card tai-card--interactive h-100">
+          <div class="d-flex justify-content-between align-items-center"><p class="tai-stat__label">Study time</p><span class="tai-icon-tile tai-icon-tile--powder"><i data-lucide="clock"></i></span></div>
+          <p class="tai-stat__value" data-count-to="6.7" data-count-suffix="h">0h</p>
+          <span class="tai-stat__trend is-up align-self-start"><i data-lucide="trending-up"></i>18%</span>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <div class="tai-card tai-card--interactive h-100">
+          <div class="d-flex justify-content-between align-items-center"><p class="tai-stat__label">Quiz accuracy</p><span class="tai-icon-tile tai-icon-tile--pink"><i data-lucide="target"></i></span></div>
+          <p class="tai-stat__value" data-count-to="79" data-count-suffix="%">0%</p>
+          <span class="tai-stat__trend is-down align-self-start"><i data-lucide="trending-down"></i>3%</span>
+        </div>
+      </div>
+      <div class="col-xl-6">
+        <div class="tai-card h-100">
+          <div class="tai-card__header">
+            <div><h3 class="tai-card__title">Recent documents</h3><p class="tai-card__subtitle">Processed for the AI Tutor</p></div>
+            <button class="btn btn-ghost btn-icon btn-sm" aria-label="More"><i data-lucide="ellipsis"></i></button>
+          </div>
+          <ul class="tai-list">
+            <li class="tai-list__item"><span class="tai-icon-tile tai-icon-tile--pink"><i data-lucide="file-text"></i></span><div class="flex-grow-1 min-w-0"><div class="fw-semibold tai-truncate">Week 6 — REST APIs with PHP</div><div class="tai-meta">PDF · 1.8 MB</div></div><span class="tai-badge tai-badge--sage tai-badge--dot">Ready</span></li>
+            <li class="tai-list__item"><span class="tai-icon-tile tai-icon-tile--butter"><i data-lucide="presentation"></i></span><div class="flex-grow-1 min-w-0"><div class="fw-semibold tai-truncate">Lecture 8 — Gradient Descent</div><div class="tai-meta">PPTX · 5.2 MB</div></div><span class="tai-badge tai-badge--butter"><span class="tai-spinner tai-spinner--sm" style="border-top-color:currentColor"></span>Processing</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Badges -->
+  <section class="sg-block" id="badges">
+    <h2>Badges</h2>
+    <p class="sg-desc">Status and categories. Pastel background with matching ink text.</p>
+    <div class="sg-row">
+      <span class="tai-badge">Neutral</span>
+      <span class="tai-badge tai-badge--lavender"><i data-lucide="sparkles"></i>AI generated</span>
+      <span class="tai-badge tai-badge--powder">In progress</span>
+      <span class="tai-badge tai-badge--sage tai-badge--dot">Completed</span>
+      <span class="tai-badge tai-badge--pink">Needs review</span>
+      <span class="tai-badge tai-badge--butter">Medium</span>
+      <span class="tai-badge tai-badge--dark">Admin</span>
+      <span class="tai-badge tai-badge--outline">Draft</span>
+      <span class="tai-badge tai-badge--lavender tai-badge--sm">New</span>
+    </div>
+  </section>
+
+  <!-- Progress -->
+  <section class="sg-block" id="progress">
+    <h2>Progress</h2>
+    <p class="sg-desc">Bars for course and goal completion; rings for single headline percentages.</p>
+    <div class="tai-card">
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-8 d-grid gap-4">
+          <div class="tai-progress-row"><div class="tai-progress-row__head"><span class="tai-progress-row__label">Advanced Web Programming</span><span class="tai-progress-row__value">68%</span></div><div class="progress"><div class="progress-bar" role="progressbar" data-meter="68" style="width:68%" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100"></div></div></div>
+          <div class="tai-progress-row"><div class="tai-progress-row__head"><span class="tai-progress-row__label">Machine Learning</span><span class="tai-progress-row__value">41%</span></div><div class="progress"><div class="progress-bar is-lavender" style="width:41%"></div></div></div>
+          <div class="tai-progress-row"><div class="tai-progress-row__head"><span class="tai-progress-row__label">Probability &amp; Statistics</span><span class="tai-progress-row__value">82%</span></div><div class="progress"><div class="progress-bar is-sage" style="width:82%"></div></div></div>
+        </div>
+        <div class="col-lg-4 d-flex gap-4 justify-content-lg-center">
+          <div class="text-center"><div class="tai-ring" style="--value:72;--size:84px">72%</div><div class="tai-meta mt-2">Weekly goal</div></div>
+          <div class="text-center"><div class="tai-ring" style="--value:45;--size:84px;--fill:#8B78D6">45%</div><div class="tai-meta mt-2">Quizzes</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Alerts -->
+  <section class="sg-block" id="alerts">
+    <h2>Alerts</h2>
+    <p class="sg-desc">Inline messages tied to the content around them. Use toasts for passing confirmations.</p>
+    <div class="d-grid gap-3">
+      <div class="alert alert-info" role="alert"><i data-lucide="info"></i><div class="alert-body"><p class="alert-title">Tip</p><p>Upload slides as PDF for the most accurate AI answers.</p></div></div>
+      <div class="alert alert-success" role="alert"><i data-lucide="circle-check"></i><div class="alert-body"><p class="alert-title">Course added</p><p>Database Systems is now in your workspace.</p></div></div>
+      <div class="alert alert-warning" role="alert"><i data-lucide="triangle-alert"></i><div class="alert-body"><p class="alert-title">Quiz due tomorrow</p><p>“HTTP &amp; REST fundamentals” closes at 11:59 pm.</p></div></div>
+      <div class="alert alert-danger alert-dismissible fade show" role="alert"><i data-lucide="circle-alert"></i><div class="alert-body"><p class="alert-title">Upload failed</p><p>Files must be under 20 MB.</p></div><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>
+      <div class="alert alert-ai" role="alert"><i data-lucide="sparkles"></i><div class="alert-body"><p class="alert-title">AI insight</p><p>You score 20% higher on quizzes taken in the morning.</p></div></div>
+    </div>
+  </section>
+
+  <!-- Tabs -->
+  <section class="sg-block" id="tabs">
+    <h2>Tabs</h2>
+    <p class="sg-desc">Underline tabs for page sections, the segmented control for view switches and filters.</p>
+    <div class="tai-card">
+      <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#sg-t1" type="button" role="tab">Overview</button></li>
+        <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#sg-t2" type="button" role="tab">Documents <span class="tai-badge tai-badge--sm">12</span></button></li>
+        <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#sg-t3" type="button" role="tab">Quizzes</button></li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane fade show active" id="sg-t1" role="tabpanel"><p class="mb-0 tai-meta">Overview content. Each pane gets 24px of breathing room under the tabs.</p></div>
+        <div class="tab-pane fade" id="sg-t2" role="tabpanel"><p class="mb-0 tai-meta">Documents content.</p></div>
+        <div class="tab-pane fade" id="sg-t3" role="tabpanel"><p class="mb-0 tai-meta">Quizzes content.</p></div>
+      </div>
+      <p class="sg-label">Segmented control</p>
+      <div class="nav tai-segmented" role="tablist" data-segmented>
+        <button class="nav-link active" data-bs-toggle="pill" type="button">Week</button>
+        <button class="nav-link" data-bs-toggle="pill" type="button">Month</button>
+        <button class="nav-link" data-bs-toggle="pill" type="button">Semester</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dropdowns, modals, toasts -->
+  <section class="sg-block" id="overlays">
+    <h2>Dropdowns, modals &amp; toasts</h2>
+    <p class="sg-desc">Built on Bootstrap's JavaScript, restyled. The topbar bell and avatar use the same dropdown styles.</p>
+    <div class="sg-row">
+      <div class="dropdown">
+        <button class="btn btn-secondary" data-bs-toggle="dropdown" aria-expanded="false"><span>Sort by</span><i data-lucide="chevron-down"></i></button>
+        <ul class="dropdown-menu">
+          <li><h6 class="dropdown-header">Sort courses</h6></li>
+          <li><button class="dropdown-item active" type="button"><i data-lucide="clock"></i>Recently opened</button></li>
+          <li><button class="dropdown-item" type="button"><i data-lucide="arrow-down-a-z"></i>Name</button></li>
+          <li><button class="dropdown-item" type="button"><i data-lucide="chart-line"></i>Progress</button></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><button class="dropdown-item text-danger" type="button"><i data-lucide="archive"></i>Show archived</button></li>
+        </ul>
+      </div>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sg-modal">Open modal</button>
+      <button class="btn btn-secondary" id="sg-confirm">Confirm dialog</button>
+      <button class="btn btn-secondary" data-toast="success">Success toast</button>
+      <button class="btn btn-secondary" data-toast="info">Info toast</button>
+      <button class="btn btn-secondary" data-toast="warning">Warning toast</button>
+      <button class="btn btn-secondary" data-toast="danger">Error toast</button>
+      <button class="btn btn-soft" data-toast="ai"><i data-lucide="sparkles"></i><span>AI toast</span></button>
+    </div>
+  </section>
+
+  <!-- Empty states -->
+  <section class="sg-block" id="empty">
+    <h2>Empty states</h2>
+    <p class="sg-desc">Generated with <code>TutorAI.ui.emptyState()</code>. Always say what's missing and offer the next step.</p>
+    <div class="row g-4">
+      <div class="col-lg-7"><div class="tai-card h-100" id="sg-empty-full"></div></div>
+      <div class="col-lg-5"><div class="tai-card h-100" id="sg-empty-compact"></div></div>
+    </div>
+  </section>
+
+  <!-- Loading -->
+  <section class="sg-block" id="loading">
+    <h2>Loading states</h2>
+    <p class="sg-desc">Skeletons for content with a known shape, spinners for actions, typing dots for the AI Tutor.</p>
+    <div class="row g-4">
+      <div class="col-md-6 col-xl-4" id="sg-skel-card"></div>
+      <div class="col-md-6 col-xl-4"><div class="tai-card h-100" id="sg-skel-list"></div></div>
+      <div class="col-md-12 col-xl-4">
+        <div class="tai-card h-100 position-relative">
+          <div class="d-flex align-items-center gap-3 mb-4"><span class="tai-spinner"></span><span class="tai-meta">Saving changes…</span></div>
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <span class="tai-avatar tai-avatar--sm">AI</span>
+            <span class="tai-card tai-card--lavender py-2 px-3" style="border-radius:14px"><span class="tai-typing" aria-label="AI Tutor is typing"><span></span><span></span><span></span></span></span>
+          </div>
+          <button class="btn btn-secondary btn-sm align-self-start" id="sg-overlay-btn">Show overlay</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Avatars & table -->
+  <section class="sg-block" id="data">
+    <h2>Avatars &amp; tables</h2>
+    <p class="sg-desc">Initials avatars in pastel tones. Tables scroll horizontally on small screens instead of overflowing.</p>
+    <div class="sg-row mb-4">
+      <span class="tai-avatar tai-avatar--sm">MC</span>
+      <span class="tai-avatar tai-avatar--powder">AR</span>
+      <span class="tai-avatar tai-avatar--lg tai-avatar--sage">JL</span>
+      <span class="tai-avatar tai-avatar--xl tai-avatar--butter">SK</span>
+      <span class="tai-avatar-group"><span class="tai-avatar tai-avatar--pink">PR</span><span class="tai-avatar tai-avatar--powder">AM</span><span class="tai-avatar tai-avatar--navy">+4</span></span>
+    </div>
+    <div class="tai-card tai-card--flush">
+      <div class="tai-table-wrap">
+        <table class="table tai-table table-hover">
+          <thead><tr><th>Student</th><th>Program</th><th>Courses</th><th>Last active</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+          <tbody>
+            <tr><td><div class="d-flex align-items-center gap-3"><span class="tai-avatar tai-avatar--sm">MC</span><div><div class="fw-semibold">Maya Chen</div><div class="tai-meta">maya.chen@university.ca</div></div></div></td><td>BSc Computer Science</td><td>4</td><td class="tai-meta">12m ago</td><td><span class="tai-badge tai-badge--sage tai-badge--dot">Active</span></td><td class="text-end"><button class="btn btn-ghost btn-icon btn-sm" aria-label="More"><i data-lucide="ellipsis"></i></button></td></tr>
+            <tr><td><div class="d-flex align-items-center gap-3"><span class="tai-avatar tai-avatar--sm tai-avatar--powder">AR</span><div><div class="fw-semibold">Arjun Rao</div><div class="tai-meta">arjun.rao@college.ca</div></div></div></td><td>Diploma, Data Analytics</td><td>3</td><td class="tai-meta">2d ago</td><td><span class="tai-badge tai-badge--butter tai-badge--dot">Invited</span></td><td class="text-end"><button class="btn btn-ghost btn-icon btn-sm" aria-label="More"><i data-lucide="ellipsis"></i></button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Demo modal -->
+  <div class="modal fade" id="sg-modal" tabindex="-1" aria-labelledby="sg-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div><h2 class="modal-title" id="sg-modal-title">Add a course</h2><p class="modal-subtitle">TutorAI uses your course materials to personalise help.</p></div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label" for="sg-m-code">Course code</label><input id="sg-m-code" class="form-control" placeholder="e.g. COMP 3610"></div>
+          <div><label class="form-label" for="sg-m-title">Course title</label><input id="sg-m-title" class="form-control" placeholder="e.g. Advanced Web Programming"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-toast="success">Add course</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="../assets/js/core/config.js"></script>
+<script src="../assets/js/core/utils.js"></script>
+<script src="../assets/js/core/navigation.js"></script>
+<script src="../assets/js/data/mock-data.js"></script>
+<script src="../assets/js/data/lecture-content.js"></script>
+<script src="../assets/js/services/mock-ai.js"></script>
+<script src="../assets/js/services/quiz-engine.js"></script>
+<script src="../assets/js/services/api.js"></script>
+<script src="../assets/js/components/ui.js"></script>
+<script src="../assets/js/components/sidebar.js"></script>
+<script src="../assets/js/components/notifications.js"></script>
+<script src="../assets/js/components/topbar.js"></script>
+<script src="../assets/js/components/palette.js"></script>
+<script src="../assets/js/core/shell.js"></script>
+<script src="../assets/js/pages/styleguide.js"></script>
+</body>
+</html>

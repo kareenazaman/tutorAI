@@ -1,0 +1,196 @@
+/* ==========================================================================
+   TutorAI — Base
+   Bootstrap theme bridge, element defaults and typography.
+   Load order: bootstrap.min.css → tokens.css → base.css → layout.css → components.css
+   ========================================================================== */
+
+/* ---- Bootstrap bridge: map Bootstrap's CSS variables onto our tokens ---- */
+:root {
+  --bs-body-font-family: var(--tai-font-sans);
+  --bs-body-font-size:   var(--tai-fs-base);
+  --bs-body-line-height: var(--tai-lh-base);
+  --bs-body-color:       var(--tai-text);
+  --bs-body-bg:          var(--tai-bg);
+  --bs-secondary-color:  var(--tai-text-muted);
+  --bs-emphasis-color:   var(--tai-charcoal);
+  --bs-border-color:     var(--tai-border);
+  --bs-border-radius:    var(--tai-radius-sm);
+  --bs-border-radius-lg: var(--tai-radius-md);
+  --bs-border-radius-sm: var(--tai-radius-xs);
+  --bs-primary:          #18181B;
+  --bs-primary-rgb:      24, 24, 27;
+  --bs-link-color:       var(--tai-black);
+  --bs-link-color-rgb:   24, 24, 27;
+  --bs-link-hover-color: var(--tai-charcoal);
+  --bs-link-hover-color-rgb: 46, 46, 51;
+  --bs-heading-color:    var(--tai-heading);
+  --bs-focus-ring-color: rgba(24, 24, 27, 0.14);
+}
+
+/* ---- Elements ------------------------------------------------------------ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: var(--tai-font-sans);
+  font-size: var(--tai-fs-base);
+  line-height: var(--tai-lh-base);
+  color: var(--tai-text);
+  background: var(--tai-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+img, svg, video { max-width: 100%; }
+
+a {
+  color: var(--tai-navy);
+  text-decoration: none;
+  transition: color var(--tai-dur-fast) var(--tai-ease);
+}
+a:hover { color: var(--tai-text-muted); }
+
+::selection { background: var(--tai-lavender); color: var(--tai-charcoal); }
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--tai-focus-ring);
+  border-radius: var(--tai-radius-xs);
+}
+
+hr { border-color: var(--tai-border); opacity: 1; }
+
+/* Lucide icons render as <svg class="lucide">; give them a sensible default */
+.lucide {
+  width: 1.125rem;
+  height: 1.125rem;
+  stroke-width: 1.75;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+.icon-xs .lucide, .lucide.icon-xs { width: 0.875rem; height: 0.875rem; }
+.icon-sm .lucide, .lucide.icon-sm { width: 1rem;     height: 1rem; }
+.icon-lg .lucide, .lucide.icon-lg { width: 1.5rem;   height: 1.5rem; }
+.icon-xl .lucide, .lucide.icon-xl { width: 2rem;     height: 2rem; stroke-width: 1.5; }
+
+/* ---- Typography ---------------------------------------------------------- */
+/* UI headings use Inter by default; add .tai-display for the editorial serif. */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: var(--tai-font-sans);
+  font-weight: var(--tai-fw-semibold);
+  line-height: var(--tai-lh-snug);
+  letter-spacing: var(--tai-ls-tight);
+  color: var(--tai-heading);
+  margin-bottom: var(--tai-space-3);
+}
+h1, .h1 { font-size: var(--tai-fs-4xl); }
+h2, .h2 { font-size: var(--tai-fs-3xl); }
+h3, .h3 { font-size: var(--tai-fs-2xl); }
+h4, .h4 { font-size: var(--tai-fs-xl); }
+h5, .h5 { font-size: var(--tai-fs-lg); }
+h6, .h6 { font-size: var(--tai-fs-md); }
+
+/* Editorial serif — use sparingly: page titles, hero lines, empty states. */
+.tai-display {
+  font-family: var(--tai-font-display);
+  font-weight: var(--tai-fw-regular);
+  letter-spacing: -0.015em;
+  line-height: var(--tai-lh-tight);
+}
+.tai-display em, .tai-display i {
+  font-style: italic;
+  color: var(--tai-lavender-ink);
+}
+
+p { margin-bottom: var(--tai-space-4); }
+
+.tai-lead {
+  font-size: var(--tai-fs-lg);
+  line-height: 1.55;
+  color: var(--tai-text-muted);
+}
+
+.tai-eyebrow {
+  display: inline-block;
+  font-size: var(--tai-fs-2xs);
+  font-weight: var(--tai-fw-semibold);
+  letter-spacing: var(--tai-ls-wide);
+  text-transform: uppercase;
+  color: var(--tai-text-muted);
+}
+
+.tai-meta  { font-size: var(--tai-fs-sm); color: var(--tai-text-muted); }
+.tai-small { font-size: var(--tai-fs-xs); }
+.text-muted, .tai-muted { color: var(--tai-text-muted) !important; }
+.tai-mono  { font-family: var(--tai-font-mono); font-size: 0.875em; }
+
+/* ---- Utilities ----------------------------------------------------------- */
+.bg-cream    { background-color: var(--tai-cream) !important; }
+.bg-lavender { background-color: var(--tai-lavender) !important; }
+.bg-powder   { background-color: var(--tai-powder) !important; }
+.bg-sage     { background-color: var(--tai-sage) !important; }
+.bg-pink     { background-color: var(--tai-pink) !important; }
+.bg-butter   { background-color: var(--tai-butter) !important; }
+
+.text-charcoal     { color: var(--tai-charcoal) !important; }
+.text-navy         { color: var(--tai-navy) !important; }
+.text-lavender-ink { color: var(--tai-lavender-ink) !important; }
+.text-powder-ink   { color: var(--tai-powder-ink) !important; }
+.text-sage-ink     { color: var(--tai-sage-ink) !important; }
+.text-pink-ink     { color: var(--tai-pink-ink) !important; }
+.text-butter-ink   { color: var(--tai-butter-ink) !important; }
+
+.fw-medium   { font-weight: var(--tai-fw-medium) !important; }
+.fw-semibold { font-weight: var(--tai-fw-semibold) !important; }
+
+.min-w-0 { min-width: 0 !important; }
+.tai-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+
+.visually-hidden-focusable:focus { position: static !important; }
+
+/* Used by the shell to stop transitions flashing on first paint */
+.tai-no-transition, .tai-no-transition * { transition: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Thin, quiet scrollbars */
+* { scrollbar-width: thin; scrollbar-color: var(--tai-border-strong) transparent; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: var(--tai-border-strong); border-radius: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* ---- Motion utilities ---------------------------------------------------- */
+/* Page content fades up on load; children stagger. Added by shell.js. */
+.tai-enter > * {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: tai-enter 0.55s var(--tai-ease) forwards;
+}
+.tai-enter > *:nth-child(1) { animation-delay: 0.02s; }
+.tai-enter > *:nth-child(2) { animation-delay: 0.08s; }
+.tai-enter > *:nth-child(3) { animation-delay: 0.14s; }
+.tai-enter > *:nth-child(4) { animation-delay: 0.20s; }
+.tai-enter > *:nth-child(5) { animation-delay: 0.26s; }
+.tai-enter > *:nth-child(n+6) { animation-delay: 0.32s; }
+
+/* Scroll reveal: add data-reveal; ui.js toggles .is-visible */
+[data-reveal] { opacity: 0; transform: translateY(14px); transition: opacity 0.6s var(--tai-ease), transform 0.6s var(--tai-ease); }
+[data-reveal].is-visible { opacity: 1; transform: none; }
+
+@keyframes tai-enter { to { opacity: 1; transform: none; } }
+
+.text-ink { color: var(--tai-black) !important; }
+.bg-peach { background-color: var(--tai-peach) !important; }
+.bg-ink   { background-color: var(--tai-black) !important; }
+.text-peach-ink { color: var(--tai-peach-ink) !important; }

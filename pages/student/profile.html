@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Profile · TutorAI</title>
+  <meta name="description" content="TutorAI — Learn. Practise. Improve.">
+  <link rel="icon" href="../../assets/img/logo-mark.svg" type="image/svg+xml">
+
+  <!-- Fonts: DM Serif Display (editorial headings) + Inter (UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5, then the TutorAI design system -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../../assets/css/main.css" rel="stylesheet">
+</head>
+<body class="page-profile" data-shell="student" data-page="profile" data-root="../../">
+
+  <main id="page-content">
+    <header class="tai-page-header">
+      <div>
+        <span class="tai-eyebrow">Personal</span>
+        <h1 class="tai-page-header__title">My Profile</h1>
+        <p class="tai-page-header__subtitle">Your details help TutorAI tailor explanations and quizzes to your program.</p>
+      </div>
+      <div class="tai-page-header__actions">
+        <button type="button" class="btn btn-primary" data-action="edit-profile" aria-controls="profile-form"><i data-lucide="pencil"></i><span>Edit profile</span></button>
+      </div>
+    </header>
+
+    <!-- Header card -->
+    <section class="tai-card tai-card--flush profile-hero" aria-labelledby="profile-hero-name">
+      <div class="profile-hero__cover" aria-hidden="true"><span class="tai-tile__deco"><i data-lucide="graduation-cap"></i></span></div>
+      <div class="profile-hero__body">
+        <span class="tai-avatar tai-avatar--xl profile-hero__avatar" data-profile-avatar aria-hidden="true"></span>
+        <div class="profile-hero__text">
+          <h2 class="profile-hero__name" id="profile-hero-name" data-profile="name"><span class="tai-skeleton tai-skeleton--title d-inline-block" style="width:12rem"></span></h2>
+          <p class="profile-hero__program" data-profile="program">&nbsp;</p>
+          <div class="profile-hero__meta">
+            <span class="tai-badge tai-badge--outline" data-profile-chip="institution" hidden><i data-lucide="school"></i><span></span></span>
+            <span class="tai-badge tai-badge--outline" data-profile-chip="year" hidden><i data-lucide="calendar-range"></i><span></span></span>
+            <span class="tai-badge tai-badge--sage" data-profile-chip="since" hidden><i data-lucide="sparkles"></i><span></span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="row g-4">
+      <div class="col-xl-8 d-flex flex-column gap-4">
+
+        <!-- Personal details: view by default, editable after "Edit profile" -->
+        <section class="tai-card" aria-labelledby="details-title">
+          <div class="tai-card__header">
+            <div>
+              <h2 class="tai-card__title" id="details-title">Personal details</h2>
+              <p class="tai-card__subtitle" data-mode-hint>Select Edit profile to change these details.</p>
+            </div>
+            <span class="tai-badge tai-badge--lavender" data-edit-only hidden><i data-lucide="pencil"></i>Editing</span>
+          </div>
+
+          <div data-form-status></div>
+
+          <form id="profile-form" class="profile-form" action="/api/users/me" method="post" data-mode="view" novalidate>
+            <div class="row g-0 gx-md-4">
+              <div class="col-md-6 tai-field">
+                <label class="form-label" for="profile-name">Full name</label>
+                <input id="profile-name" name="full_name" type="text" class="form-control" autocomplete="name" maxlength="80" readonly required>
+              </div>
+              <div class="col-md-6 tai-field">
+                <label class="form-label" for="profile-email">Email</label>
+                <input id="profile-email" name="email" type="email" class="form-control" autocomplete="email" inputmode="email" readonly required>
+              </div>
+              <div class="col-md-6 tai-field">
+                <label class="form-label" for="profile-institution">University or college</label>
+                <input id="profile-institution" name="institution" type="text" class="form-control" autocomplete="organization" maxlength="120" readonly required>
+              </div>
+              <div class="col-md-6 tai-field">
+                <label class="form-label" for="profile-program">Program</label>
+                <input id="profile-program" name="program" type="text" class="form-control" maxlength="120" placeholder="e.g. BSc Computer Science" readonly required>
+              </div>
+              <div class="col-md-6 tai-field">
+                <label class="form-label" for="profile-year">Year of study</label>
+                <select id="profile-year" name="year_of_study" class="form-select" disabled required>
+                  <option value="">Select your year</option>
+                  <option value="1">1st year</option>
+                  <option value="2">2nd year</option>
+                  <option value="3">3rd year</option>
+                  <option value="4">4th year</option>
+                  <option value="5">5th year or later</option>
+                  <option value="6">Graduate / postgraduate</option>
+                </select>
+              </div>
+              <div class="col-12 tai-field">
+                <div class="tai-field__row">
+                  <label class="form-label" for="profile-bio">Bio <span class="tai-muted fw-normal">(optional)</span></label>
+                  <span class="form-text mt-0 profile-form__count" id="profile-bio-count" data-edit-only hidden>0 / 280</span>
+                </div>
+                <textarea id="profile-bio" name="bio" class="form-control" rows="3" maxlength="280" placeholder="No bio yet." aria-describedby="profile-bio-count" readonly></textarea>
+              </div>
+            </div>
+
+            <div class="profile-form__actions" data-edit-only hidden>
+              <button type="button" class="btn btn-secondary" data-action="cancel-edit"><span>Cancel</span></button>
+              <button type="submit" class="btn btn-primary"><i data-lucide="check"></i><span>Save changes</span></button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Change password -->
+        <section class="tai-card" aria-labelledby="password-title">
+          <div class="tai-card__header">
+            <div>
+              <h2 class="tai-card__title" id="password-title">Change password</h2>
+              <p class="tai-card__subtitle">You'll stay signed in on this device.</p>
+            </div>
+            <span class="tai-icon-tile tai-icon-tile--butter" aria-hidden="true"><i data-lucide="lock-keyhole"></i></span>
+          </div>
+
+          <div data-form-status></div>
+
+          <form id="password-form" action="/api/users/me/password" method="post" novalidate>
+            <input type="text" name="username" autocomplete="username" class="d-none" tabindex="-1" aria-hidden="true">
+            <div class="row g-0 gx-md-4">
+              <div class="col-md-6">
+            <div class="tai-field">
+              <label class="form-label" for="password-current">Current password</label>
+              <div class="tai-password">
+                <input id="password-current" name="current_password" type="password" class="form-control" autocomplete="current-password" required>
+                <button type="button" class="btn btn-ghost btn-icon btn-sm tai-password__toggle" data-password-toggle></button>
+              </div>
+            </div>
+              </div>
+              <div class="w-100"></div>
+              <div class="col-md-6">
+            <div class="tai-field">
+              <label class="form-label" for="password-new">New password</label>
+              <div class="tai-password">
+                <input id="password-new" name="new_password" type="password" class="form-control" autocomplete="new-password" required>
+                <button type="button" class="btn btn-ghost btn-icon btn-sm tai-password__toggle" data-password-toggle></button>
+              </div>
+            </div>
+              </div>
+              <div class="col-md-6">
+            <div class="tai-field">
+              <label class="form-label" for="password-confirm">Confirm new password</label>
+              <div class="tai-password">
+                <input id="password-confirm" name="confirm_password" type="password" class="form-control" autocomplete="new-password" required>
+                <button type="button" class="btn btn-ghost btn-icon btn-sm tai-password__toggle" data-password-toggle></button>
+              </div>
+            </div>
+              </div>
+            </div>
+            <div class="profile-form__actions">
+              <button type="submit" class="btn btn-secondary"><i data-lucide="key-round"></i><span>Update password</span></button>
+            </div>
+          </form>
+        </section>
+      </div>
+
+      <div class="col-xl-4 d-flex flex-column gap-4">
+        <!-- Account information -->
+        <section class="tai-card" aria-labelledby="account-title">
+          <div class="tai-card__header">
+            <h2 class="tai-card__title" id="account-title">Account information</h2>
+          </div>
+          <dl class="profile-facts mb-0">
+            <div class="profile-facts__row"><dt>User ID</dt><dd class="tai-mono" data-fact="id">—</dd></div>
+            <div class="profile-facts__row"><dt>Role</dt><dd data-fact="role">—</dd></div>
+            <div class="profile-facts__row"><dt>Account created</dt><dd data-fact="created">—</dd></div>
+            <div class="profile-facts__row"><dt>Last login</dt><dd data-fact="login">—</dd></div>
+          </dl>
+        </section>
+
+        <div class="alert alert-info mb-0" role="note">
+          <i data-lucide="flask-conical"></i>
+          <div class="alert-body">
+            <p class="alert-title">Demo mode</p>
+            <p>Profile changes are kept for this browser tab only. Passwords are checked but never saved. Demo password: <span class="tai-mono">Practise2026!</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Vendor -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <!-- Chart.js — only on pages with charts:
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="../../assets/js/core/chart-theme.js"></script> -->
+
+  <!-- TutorAI core (order matters) -->
+  <script src="../../assets/js/core/config.js"></script>
+  <script src="../../assets/js/core/utils.js"></script>
+  <script src="../../assets/js/core/navigation.js"></script>
+  <script src="../../assets/js/data/mock-data.js"></script>
+  <script src="../../assets/js/data/lecture-content.js"></script>
+  <script src="../../assets/js/services/mock-ai.js"></script>
+  <script src="../../assets/js/services/quiz-engine.js"></script>
+  <script src="../../assets/js/services/api.js"></script>
+  <script src="../../assets/js/components/ui.js"></script>
+  <script src="../../assets/js/core/validation.js"></script>
+  <script src="../../assets/js/components/sidebar.js"></script>
+  <script src="../../assets/js/components/notifications.js"></script>
+  <script src="../../assets/js/components/topbar.js"></script>
+  <script src="../../assets/js/components/palette.js"></script>
+  <script src="../../assets/js/core/shell.js"></script>
+
+  <!-- Page script -->
+  <script src="../../assets/js/pages/profile.js"></script>
+</body>
+</html>

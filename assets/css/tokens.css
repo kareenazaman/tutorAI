@@ -1,0 +1,136 @@
+/* ==========================================================================
+   TutorAI — Design tokens  ·  "Pastels with black"
+   Single source of truth for colour, type, spacing, radius, shadow & motion.
+   White canvas, near-black ink, bold pastel blocks.
+   ========================================================================== */
+
+:root {
+  /* ---- Core neutrals ---------------------------------------------------- */
+  --tai-white:        #FFFFFF;
+  --tai-black:        #18181B;   /* ink: text, primary buttons, feature tiles */
+  --tai-black-hover:  #2E2E33;
+  --tai-gray-50:      #F7F7F5;   /* subtle surfaces, hover, page wash        */
+  --tai-gray-100:     #EFEFEC;   /* tracks, pressed states                   */
+  --tai-border:       #ECECE8;
+  --tai-border-strong:#DCDCD6;
+  --tai-text-muted:   #6B6B76;
+  --tai-text-faint:   #A1A1AA;
+
+  /* ---- Pastels: used as BIG blocks (tiles, cards), not tiny accents ----- */
+  --tai-lavender:     #E9E3FA;   --tai-lavender-ink: #3B2A75;
+  --tai-powder:       #DCEBFB;   --tai-powder-ink:   #1F4A7A;
+  --tai-sage:         #D8F0E3;   --tai-sage-ink:     #1E5B3E;
+  --tai-pink:         #FBE1E4;   --tai-pink-ink:     #8A2E3E;
+  --tai-butter:       #FFF1B8;   --tai-butter-ink:   #6B4F00;
+  --tai-peach:        #FFE4D1;   --tai-peach-ink:    #8A3F12;
+
+  /* Back-compat aliases (stage 1 names) */
+  --tai-charcoal:     var(--tai-black);
+  --tai-navy:         var(--tai-black);
+  --tai-navy-hover:   var(--tai-black-hover);
+  --tai-cream:        var(--tai-gray-50);
+  --tai-cream-deep:   var(--tai-gray-100);
+  --tai-overlay:      rgba(24, 24, 27, 0.4);
+
+  /* ---- Semantic aliases ------------------------------------------------- */
+  --tai-bg:           var(--tai-white);
+  --tai-surface:      var(--tai-white);
+  --tai-text:         var(--tai-black);
+  --tai-heading:      var(--tai-black);
+  --tai-primary:      var(--tai-black);
+  --tai-primary-hover:var(--tai-black-hover);
+
+  --tai-info-bg:      var(--tai-powder);   --tai-info-ink:    var(--tai-powder-ink);
+  --tai-success-bg:   var(--tai-sage);     --tai-success-ink: var(--tai-sage-ink);
+  --tai-warning-bg:   var(--tai-butter);   --tai-warning-ink: var(--tai-butter-ink);
+  --tai-danger-bg:    var(--tai-pink);     --tai-danger-ink:  var(--tai-pink-ink);
+  --tai-ai-bg:        var(--tai-lavender); --tai-ai-ink:      var(--tai-lavender-ink);
+
+  /* ---- Typography ------------------------------------------------------- */
+  --tai-font-display: 'DM Serif Display', 'Georgia', 'Times New Roman', serif;
+  --tai-font-sans:    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --tai-font-mono:    ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  --tai-fs-2xs:   0.6875rem;  /* 11 */
+  --tai-fs-xs:    0.75rem;    /* 12 */
+  --tai-fs-sm:    0.8125rem;  /* 13 */
+  --tai-fs-base:  0.9375rem;  /* 15 */
+  --tai-fs-md:    1rem;       /* 16 */
+  --tai-fs-lg:    1.125rem;   /* 18 */
+  --tai-fs-xl:    1.375rem;   /* 22 */
+  --tai-fs-2xl:   1.75rem;    /* 28 */
+  --tai-fs-3xl:   2.5rem;     /* 40 */
+  --tai-fs-4xl:   3.25rem;    /* 52 */
+
+  --tai-fw-regular: 400;
+  --tai-fw-medium:  500;
+  --tai-fw-semibold:600;
+  --tai-fw-bold:    700;
+
+  --tai-lh-tight:   1.1;
+  --tai-lh-snug:    1.3;
+  --tai-lh-base:    1.6;
+
+  --tai-ls-tight:  -0.02em;
+  --tai-ls-wide:    0.06em;
+
+  /* ---- Spacing (4px base) ---------------------------------------------- */
+  --tai-space-1:  0.25rem;
+  --tai-space-2:  0.5rem;
+  --tai-space-3:  0.75rem;
+  --tai-space-4:  1rem;
+  --tai-space-5:  1.25rem;
+  --tai-space-6:  1.5rem;
+  --tai-space-8:  2rem;
+  --tai-space-10: 2.5rem;
+  --tai-space-12: 3rem;
+  --tai-space-16: 4rem;
+
+  /* ---- Radius: generous, modern ---------------------------------------- */
+  --tai-radius-xs:   8px;
+  --tai-radius-sm:   10px;
+  --tai-radius-md:   14px;
+  --tai-radius-lg:   20px;
+  --tai-radius-xl:   26px;
+  --tai-radius-pill: 999px;
+
+  /* ---- Shadows: barely-there at rest, lift on hover --------------------- */
+  --tai-shadow-xs: 0 1px 2px rgba(24, 24, 27, 0.04);
+  --tai-shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.04), 0 4px 12px rgba(24, 24, 27, 0.04);
+  --tai-shadow-md: 0 2px 6px rgba(24, 24, 27, 0.04), 0 12px 32px rgba(24, 24, 27, 0.08);
+  --tai-shadow-lg: 0 8px 16px rgba(24, 24, 27, 0.06), 0 28px 64px rgba(24, 24, 27, 0.14);
+  --tai-focus-ring: 0 0 0 3px rgba(24, 24, 27, 0.14);
+
+  /* ---- Motion ----------------------------------------------------------- */
+  --tai-ease:        cubic-bezier(0.2, 0.8, 0.2, 1);
+  --tai-ease-spring: cubic-bezier(0.34, 1.4, 0.5, 1);
+  --tai-dur-fast:    140ms;
+  --tai-dur:         220ms;
+  --tai-dur-slow:    380ms;
+  --tai-transition:  all var(--tai-dur) var(--tai-ease);
+
+  /* ---- Layout ----------------------------------------------------------- */
+  --tai-sidebar-w:           264px;
+  --tai-sidebar-w-collapsed: 80px;
+  --tai-topbar-h:            72px;
+  --tai-content-max:         1320px;
+  --tai-content-pad:         var(--tai-space-8);
+
+  /* ---- Z-index ---------------------------------------------------------- */
+  --tai-z-topbar:   1020;
+  --tai-z-backdrop: 1035;
+  --tai-z-sidebar:  1040;
+  --tai-z-palette:  1080;
+  --tai-z-toast:    1090;
+}
+
+@media (max-width: 991.98px) {
+  :root { --tai-content-pad: var(--tai-space-6); --tai-topbar-h: 64px; }
+}
+@media (max-width: 575.98px) {
+  :root {
+    --tai-content-pad: var(--tai-space-4);
+    --tai-fs-3xl: 2rem;
+    --tai-fs-4xl: 2.5rem;
+  }
+}

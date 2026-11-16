@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<!--
+  TutorAI auth page. Uses the shared auth layout (assets/js/core/auth-layout.js),
+  not the app shell: no sidebar or topbar. Put only the heading and form
+  inside <main id="page-content">.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create account · TutorAI</title>
+  <meta name="description" content="Create your TutorAI account.">
+  <link rel="icon" href="../../assets/img/logo-mark.svg" type="image/svg+xml">
+
+  <!-- Fonts: DM Serif Display (editorial headings) + Inter (UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5, then the TutorAI design system -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../../assets/css/main.css" rel="stylesheet">
+</head>
+<body class="page-register" data-layout="auth" data-page="register" data-root="../../">
+
+  <main id="page-content">
+    <div class="tai-auth__head">
+      <span class="tai-eyebrow">Get started</span>
+      <h1 class="tai-auth__title tai-display">Create your <em>account</em></h1>
+      <p class="tai-meta">Free for students. It takes less than a minute.</p>
+    </div>
+
+    <div data-register-view>
+      <div data-form-status></div>
+
+      <form id="register-form" action="/api/auth/register" method="post" novalidate>
+        <div class="tai-field">
+          <label class="form-label" for="register-name">Full name</label>
+          <div class="tai-input-icon">
+            <i data-lucide="user"></i>
+            <input id="register-name" name="full_name" type="text" class="form-control" autocomplete="name" placeholder="Maya Chen" maxlength="80" required>
+          </div>
+        </div>
+
+        <div class="tai-field">
+          <label class="form-label" for="register-email">Email</label>
+          <div class="tai-input-icon">
+            <i data-lucide="mail"></i>
+            <input id="register-email" name="email" type="email" class="form-control" autocomplete="email" inputmode="email" placeholder="you@university.ca" aria-describedby="register-email-help" required>
+          </div>
+          <p class="form-text mb-0" id="register-email-help">Use your institution email if you have one.</p>
+        </div>
+
+        <div class="tai-field">
+          <div class="tai-field__row">
+            <label class="form-label" for="register-password">Password</label>
+          </div>
+          <div class="tai-password">
+            <input id="register-password" name="password" type="password" class="form-control" autocomplete="new-password" required>
+            <button type="button" class="btn btn-ghost btn-icon btn-sm tai-password__toggle" data-password-toggle></button>
+          </div>
+        </div>
+
+        <div class="tai-field">
+          <div class="tai-field__row">
+            <label class="form-label" for="register-confirm">Confirm password</label>
+          </div>
+          <div class="tai-password">
+            <input id="register-confirm" name="confirm_password" type="password" class="form-control" autocomplete="new-password" required>
+            <button type="button" class="btn btn-ghost btn-icon btn-sm tai-password__toggle" data-password-toggle></button>
+          </div>
+        </div>
+
+        <div class="tai-field">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="register-terms" name="terms" value="1" required>
+            <label class="form-check-label" for="register-terms">I agree to the <a class="tai-auth__link" href="#" data-terms>Terms of Use</a> and <a class="tai-auth__link" href="#" data-terms>Privacy Policy</a></label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-100"><span>Create account</span></button>
+      </form>
+
+      <p class="tai-auth__alt">Already have an account? <a href="login.html">Sign in</a></p>
+    </div>
+
+    <div class="tai-auth__state" data-register-success hidden tabindex="-1">
+      <span class="tai-icon-tile tai-icon-tile--sage tai-icon-tile--lg"><i data-lucide="party-popper"></i></span>
+      <h2 class="h4 mb-2">Welcome, <span data-new-name>there</span>!</h2>
+      <p class="tai-meta">Your account <span class="tai-mono" data-new-id></span> is ready. In demo mode the app opens as the sample student, Maya.</p>
+      <a class="btn btn-primary btn-lg w-100 mt-2" href="../student/dashboard.html"><span>Continue to dashboard</span><i data-lucide="arrow-right"></i></a>
+    </div>
+  </main>
+
+  <!-- Vendor -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <!-- TutorAI core (order matters) -->
+  <script src="../../assets/js/core/config.js"></script>
+  <script src="../../assets/js/core/utils.js"></script>
+  <script src="../../assets/js/data/mock-data.js"></script>
+  <script src="../../assets/js/data/lecture-content.js"></script>
+  <script src="../../assets/js/services/mock-ai.js"></script>
+  <script src="../../assets/js/services/quiz-engine.js"></script>
+  <script src="../../assets/js/services/api.js"></script>
+  <script src="../../assets/js/components/ui.js"></script>
+  <script src="../../assets/js/core/validation.js"></script>
+  <script src="../../assets/js/core/auth-layout.js"></script>
+
+  <!-- Page script -->
+  <script src="../../assets/js/pages/register.js"></script>
+</body>
+</html>

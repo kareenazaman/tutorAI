@@ -1,0 +1,538 @@
+/* ==========================================================================
+   TutorAI — Application shell
+   Sidebar + topbar + content area, shared by the student and admin apps.
+
+   Breakpoints
+   ≥ 1200px   full sidebar (user can collapse to an icon rail)
+   992–1199   icon rail by default (user can expand)
+   < 992px    off-canvas drawer opened from the topbar menu button
+   ========================================================================== */
+
+.tai-app {
+  min-height: 100vh;
+  background: var(--tai-bg);
+}
+
+/* ---- Sidebar: themeable through local variables ------------------------- */
+.tai-sidebar {
+  --sb-bg:            var(--tai-gray-50);
+  --sb-border:        var(--tai-border);
+  --sb-text:          var(--tai-text-muted);
+  --sb-text-strong:   var(--tai-black);
+  --sb-section:       var(--tai-text-faint);
+  --sb-hover-bg:      var(--tai-gray-100);
+  --sb-active-bg:     var(--tai-black);
+  --sb-active-text:   var(--tai-white);
+  --sb-active-icon:   var(--tai-white);
+  --sb-card-bg:       var(--tai-lavender);
+  --sb-card-border:   transparent;
+  --sb-card-text:     var(--tai-lavender-ink);
+
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: var(--tai-z-sidebar);
+  width: var(--tai-sidebar-w);
+  display: flex;
+  flex-direction: column;
+  background: var(--sb-bg);
+  border-right: 1px solid var(--sb-border);
+  transition: width var(--tai-dur-slow) var(--tai-ease),
+              transform var(--tai-dur-slow) var(--tai-ease);
+}
+
+/* Admin sidebar: deep charcoal so the two consoles are never confused */
+.tai-sidebar--admin {
+  --sb-bg:            var(--tai-black);
+  --sb-border:        #26262B;
+  --sb-text:          #A1A1AA;
+  --sb-text-strong:   var(--tai-white);
+  --sb-section:       #6B6B76;
+  --sb-hover-bg:      rgba(255, 255, 255, 0.06);
+  --sb-active-bg:     var(--tai-white);
+  --sb-active-text:   var(--tai-black);
+  --sb-active-icon:   var(--tai-black);
+  --sb-card-bg:       rgba(255, 255, 255, 0.05);
+  --sb-card-border:   rgba(255, 255, 255, 0.08);
+  --sb-card-text:     #A1A1AA;
+}
+
+.tai-sidebar__brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tai-space-2);
+  height: var(--tai-topbar-h);
+  padding: 0 var(--tai-space-5);
+  flex-shrink: 0;
+}
+
+.tai-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--tai-space-3);
+  min-width: 0;
+  color: var(--sb-text-strong, var(--tai-charcoal));
+}
+.tai-brand:hover { color: var(--sb-text-strong, var(--tai-charcoal)); }
+.tai-brand__mark { width: 34px; height: 34px; flex-shrink: 0; }
+.tai-brand__text { display: flex; flex-direction: column; min-width: 0; line-height: 1.1; }
+.tai-brand__name {
+  font-family: var(--tai-font-display);
+  font-size: 1.375rem;
+  letter-spacing: -0.01em;
+}
+.tai-brand__tag {
+  font-size: var(--tai-fs-2xs);
+  font-weight: var(--tai-fw-medium);
+  color: var(--sb-text, var(--tai-text-muted));
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+.tai-sidebar .tai-sidebar__close { display: none; color: var(--sb-text); }
+
+.tai-sidebar__nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--tai-space-2) var(--tai-space-4) var(--tai-space-4);
+}
+
+.tai-nav-section + .tai-nav-section { margin-top: var(--tai-space-6); }
+
+.tai-nav-section__title {
+  font-size: var(--tai-fs-2xs);
+  font-weight: var(--tai-fw-semibold);
+  letter-spacing: var(--tai-ls-wide);
+  text-transform: uppercase;
+  color: var(--sb-section);
+  padding: 0 var(--tai-space-3);
+  margin: 0 0 var(--tai-space-2);
+  white-space: nowrap;
+  height: 18px;
+}
+
+.tai-nav-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+
+.tai-nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--tai-space-3);
+  height: 42px;
+  padding: 0 var(--tai-space-3);
+  border-radius: 12px;
+  color: var(--sb-text);
+  font-size: var(--tai-fs-sm);
+  font-weight: var(--tai-fw-medium);
+  white-space: nowrap;
+  transition: background-color var(--tai-dur-fast) var(--tai-ease),
+              color var(--tai-dur-fast) var(--tai-ease),
+              transform var(--tai-dur-fast) var(--tai-ease);
+}
+.tai-nav-link:hover { background: var(--sb-hover-bg); color: var(--sb-text-strong); }
+.tai-nav-link .lucide { width: 1.125rem; height: 1.125rem; }
+
+.tai-nav-link.is-active {
+  background: var(--sb-active-bg);
+  color: var(--sb-active-text);
+  font-weight: var(--tai-fw-semibold);
+}
+.tai-nav-link.is-active .lucide { color: var(--sb-active-icon); }
+.tai-nav-link.is-active { box-shadow: 0 4px 14px rgba(24, 24, 27, 0.18); }
+.tai-nav-link:active { transform: scale(0.98); }
+
+.tai-nav-link__label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+.tai-nav-link__badge {
+  font-size: var(--tai-fs-2xs);
+  font-weight: var(--tai-fw-semibold);
+  padding: 2px 7px;
+  border-radius: var(--tai-radius-pill);
+  background: var(--tai-butter);
+  color: var(--tai-butter-ink);
+}
+.tai-nav-link.is-active .tai-nav-link__badge { background: var(--tai-butter); }
+
+.tai-sidebar__footer { padding: var(--tai-space-4); flex-shrink: 0; }
+
+.tai-sidebar-card {
+  background: var(--sb-card-bg);
+  border: 1px solid var(--sb-card-border);
+  border-radius: var(--tai-radius-lg);
+  padding: var(--tai-space-4);
+  color: var(--sb-card-text);
+  font-size: var(--tai-fs-xs);
+  line-height: 1.5;
+}
+.tai-sidebar-card__title {
+  display: flex;
+  align-items: center;
+  gap: var(--tai-space-2);
+  font-size: var(--tai-fs-sm);
+  font-weight: var(--tai-fw-semibold);
+  color: var(--tai-black);
+  margin-bottom: var(--tai-space-1);
+}
+.tai-sidebar--admin .tai-sidebar-card__title { color: var(--tai-white); }
+.tai-sidebar-card .btn { margin-top: var(--tai-space-3); }
+
+.tai-status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #7FB070;
+  box-shadow: 0 0 0 3px rgba(127, 176, 112, 0.2);
+  flex-shrink: 0;
+}
+
+/* ---- Main column --------------------------------------------------------- */
+.tai-main {
+  margin-left: var(--tai-sidebar-w);
+  min-width: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left var(--tai-dur-slow) var(--tai-ease);
+}
+
+/* ---- Topbar -------------------------------------------------------------- */
+.tai-topbar {
+  position: sticky;
+  top: 0;
+  z-index: var(--tai-z-topbar);
+  height: var(--tai-topbar-h);
+  display: flex;
+  align-items: center;
+  gap: var(--tai-space-4);
+  padding: 0 var(--tai-content-pad);
+  background: rgba(255, 255, 255, 0.8);
+  -webkit-backdrop-filter: saturate(160%) blur(12px);
+  backdrop-filter: saturate(160%) blur(12px);
+  border-bottom: 1px solid var(--tai-border);
+}
+
+.tai-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: var(--tai-fs-sm);
+  color: var(--tai-text-muted);
+  white-space: nowrap;
+}
+.tai-crumbs .lucide { width: 14px; height: 14px; color: var(--tai-text-faint); }
+.tai-crumbs__current { color: var(--tai-black); font-weight: var(--tai-fw-semibold); overflow: hidden; text-overflow: ellipsis; }
+
+.tai-topbar__search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  max-width: 440px;
+  height: 42px;
+  margin-left: var(--tai-space-4);
+  padding: 0 10px 0 16px;
+  border: 1px solid transparent;
+  border-radius: var(--tai-radius-pill);
+  background: var(--tai-gray-50);
+  color: var(--tai-text-faint);
+  font-size: var(--tai-fs-sm);
+  text-align: left;
+  cursor: text;
+  transition: border-color var(--tai-dur-fast) var(--tai-ease), background-color var(--tai-dur-fast) var(--tai-ease);
+}
+.tai-topbar__search:hover { border-color: var(--tai-border-strong); background: var(--tai-white); }
+.tai-topbar__search .lucide { color: var(--tai-text-muted); }
+.tai-topbar__search-text { flex: 1; }
+.tai-topbar__search kbd { margin-left: auto; }
+
+.tai-topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--tai-space-2);
+  margin-left: auto;
+}
+
+.tai-kbd, kbd.tai-kbd {
+  font-family: var(--tai-font-sans);
+  font-size: var(--tai-fs-2xs);
+  font-weight: var(--tai-fw-medium);
+  color: var(--tai-text-muted);
+  background: var(--tai-white);
+  border: 1px solid var(--tai-border);
+  border-radius: 6px;
+  padding: 2px 6px;
+  box-shadow: none;
+}
+
+/* Profile trigger */
+.tai-profile-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--tai-space-3);
+  padding: 4px 10px 4px 4px;
+  border: 1px solid transparent;
+  border-radius: var(--tai-radius-pill);
+  background: transparent;
+  color: var(--tai-charcoal);
+  transition: var(--tai-transition);
+}
+.tai-profile-btn:hover,
+.tai-profile-btn[aria-expanded="true"] { background: var(--tai-gray-50); border-color: var(--tai-border); }
+.tai-profile-btn__text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.2; }
+.tai-profile-btn__name { font-size: var(--tai-fs-sm); font-weight: var(--tai-fw-semibold); }
+.tai-profile-btn__role { font-size: var(--tai-fs-2xs); color: var(--tai-text-muted); }
+.tai-profile-btn .lucide-chevron-down { width: 14px; height: 14px; color: var(--tai-text-muted); }
+
+/* Notification bell dot */
+.tai-bell { position: relative; }
+.tai-bell__count {
+  position: absolute;
+  top: 3px; right: 2px;
+  min-width: 18px; height: 18px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: var(--tai-radius-pill);
+  background: var(--tai-pink-ink);
+  color: var(--tai-white);
+  font-size: 10px;
+  font-weight: var(--tai-fw-semibold);
+  line-height: 14px;
+  text-align: center;
+  border: 2px solid var(--tai-white);
+  pointer-events: none;
+}
+.tai-bell__count:empty, .tai-bell__count[data-count="0"] { display: none; }
+
+/* ---- Content area -------------------------------------------------------- */
+.tai-content {
+  flex: 1;
+  width: 100%;
+  max-width: calc(var(--tai-content-max) + var(--tai-content-pad) * 2);
+  margin: 0 auto;
+  padding: var(--tai-space-8) var(--tai-content-pad) var(--tai-space-12);
+}
+
+.tai-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--tai-space-4);
+  margin-bottom: var(--tai-space-8);
+}
+.tai-page-header__title {
+  font-family: var(--tai-font-display);
+  font-weight: var(--tai-fw-regular);
+  font-size: var(--tai-fs-3xl);
+  letter-spacing: -0.02em;
+  line-height: var(--tai-lh-tight);
+  margin: var(--tai-space-1) 0 var(--tai-space-2);
+}
+.tai-page-header__subtitle { color: var(--tai-text-muted); margin: 0; max-width: 60ch; }
+.tai-page-header__actions { display: flex; flex-wrap: wrap; gap: var(--tai-space-2); }
+
+.tai-section { margin-bottom: var(--tai-space-10); }
+.tai-section__header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--tai-space-4); margin-bottom: var(--tai-space-4);
+}
+.tai-section__title { font-size: var(--tai-fs-lg); font-weight: var(--tai-fw-semibold); margin: 0; }
+
+.tai-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--tai-z-backdrop);
+  background: var(--tai-overlay);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--tai-dur-slow) var(--tai-ease), visibility var(--tai-dur-slow);
+}
+
+/* ==========================================================================
+   Collapsed icon rail (desktop & tablet only)
+   ========================================================================== */
+@media (min-width: 992px) {
+  .tai-app.is-collapsed .tai-sidebar { width: var(--tai-sidebar-w-collapsed); }
+  .tai-app.is-collapsed .tai-main    { margin-left: var(--tai-sidebar-w-collapsed); }
+
+  .tai-app.is-collapsed .tai-sidebar__brand { padding: 0; justify-content: center; }
+  .tai-app.is-collapsed .tai-brand__text,
+  .tai-app.is-collapsed .tai-nav-link__label,
+  .tai-app.is-collapsed .tai-nav-link__badge,
+  .tai-app.is-collapsed .tai-sidebar__footer { display: none; }
+
+  .tai-app.is-collapsed .tai-sidebar__nav { padding-left: var(--tai-space-3); padding-right: var(--tai-space-3); }
+  .tai-app.is-collapsed .tai-nav-section__title {
+    font-size: 0; padding: 0; margin: 0 var(--tai-space-3) var(--tai-space-3);
+    height: 1px; background: var(--sb-border);
+  }
+  .tai-app.is-collapsed .tai-nav-link { justify-content: center; padding: 0; }
+}
+
+/* ==========================================================================
+   Mobile & small tablet: off-canvas drawer
+   ========================================================================== */
+@media (max-width: 991.98px) {
+  .tai-sidebar {
+    width: min(var(--tai-sidebar-w), 86vw);
+    transform: translateX(-100%);
+    box-shadow: none;
+  }
+  .tai-app.is-sidebar-open .tai-sidebar {
+    transform: translateX(0);
+    box-shadow: var(--tai-shadow-lg);
+  }
+  .tai-app.is-sidebar-open .tai-sidebar-backdrop { opacity: 1; visibility: visible; }
+  .tai-sidebar .tai-sidebar__close { display: inline-flex; }
+
+  .tai-main { margin-left: 0; }
+  .tai-topbar { gap: var(--tai-space-3); }
+  .tai-topbar__search { margin-left: var(--tai-space-2); }
+  .tai-content { padding-top: var(--tai-space-6); }
+}
+
+@media (max-width: 767.98px) {
+  .tai-topbar__search { display: none; }
+  .tai-topbar__search-toggle { display: inline-flex !important; }
+  .tai-profile-btn__text, .tai-profile-btn .lucide-chevron-down { display: none; }
+  .tai-profile-btn { padding: 2px; }
+  .tai-page-header { align-items: flex-start; margin-bottom: var(--tai-space-6); }
+  .tai-page-header__actions { width: 100%; }
+}
+
+@media (max-width: 575.98px) {
+  .tai-crumbs__parent, .tai-crumbs .lucide { display: none; }
+}
+
+/* Prevent background scroll while the drawer is open */
+body.tai-lock-scroll { overflow: hidden; }
+
+
+/* ==========================================================================
+   Auth layout (pages/auth/*) — built by assets/js/core/auth-layout.js
+   Split screen: form on the left, pastel bento panel on the right.
+   Below 992px the panel is dropped and the form fills the screen.
+   ========================================================================== */
+.tai-auth {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  background: var(--tai-white);
+}
+
+.tai-auth__main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--tai-space-6) clamp(var(--tai-space-6), 5vw, var(--tai-space-16));
+}
+.tai-auth__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--tai-space-3);
+}
+.tai-auth__logo { display: inline-flex; }
+.tai-auth__logo img { height: 32px; width: auto; }
+.tai-auth__demo { white-space: normal; text-align: left; }
+.tai-auth__demo .lucide { width: 13px; height: 13px; }
+
+.tai-auth__body { flex: 1; display: flex; align-items: center; justify-content: center; }
+.tai-auth__content {
+  width: 100%;
+  max-width: 420px;
+  padding: var(--tai-space-10) 0;
+}
+.tai-auth__content:focus { outline: none; box-shadow: none; }
+
+.tai-auth__head { margin-bottom: var(--tai-space-6); }
+.tai-auth__title {
+  font-size: clamp(2rem, 3.4vw, 2.625rem);
+  margin: var(--tai-space-2) 0 var(--tai-space-2);
+  color: var(--tai-black);
+}
+.tai-auth__head p { margin: 0; }
+
+.tai-auth__alt {
+  margin: var(--tai-space-6) 0 0;
+  text-align: center;
+  font-size: var(--tai-fs-sm);
+  color: var(--tai-text-muted);
+}
+.tai-auth__alt a, .tai-auth__link { font-weight: var(--tai-fw-semibold); color: var(--tai-black); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.tai-auth__alt a:hover, .tai-auth__link:hover { color: var(--tai-text-muted); }
+
+/* Success / invalid-link states that replace a form */
+.tai-auth__state { text-align: left; }
+.tai-auth__state:focus, .tai-auth__state:focus-visible { outline: none; box-shadow: none; }
+.tai-auth__state .tai-icon-tile { margin-bottom: var(--tai-space-5); }
+
+.tai-auth__foot {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--tai-space-3);
+  flex-wrap: wrap;
+  font-size: var(--tai-fs-xs);
+  color: var(--tai-text-faint);
+}
+
+/* ---- Bento panel ---------------------------------------------------------- */
+.tai-auth__aside { padding: var(--tai-space-4) var(--tai-space-4) var(--tai-space-4) 0; }
+.tai-auth__panel {
+  position: sticky;
+  top: var(--tai-space-4);
+  height: calc(100vh - var(--tai-space-8));
+  height: calc(100dvh - var(--tai-space-8));
+  min-height: 560px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  gap: var(--tai-space-3);
+}
+.tai-auth__panel .tai-tile { min-height: 0; }
+.tai-auth__hero {
+  grid-column: span 2;
+  justify-content: flex-end;
+  padding: clamp(var(--tai-space-6), 3.5vw, var(--tai-space-12));
+}
+.tai-auth__hero .tai-chip { position: absolute; top: clamp(var(--tai-space-6), 3.5vw, var(--tai-space-12)); left: clamp(var(--tai-space-6), 3.5vw, var(--tai-space-12)); }
+.tai-auth__tagline {
+  font-size: clamp(2.75rem, 5vw, 4.5rem);
+  line-height: 1.02;
+  color: var(--tai-black);
+  margin: 0 0 var(--tai-space-4);
+  max-width: 10ch;
+}
+.tai-auth__lead { font-size: var(--tai-fs-md); line-height: 1.55; max-width: 40ch; margin: 0; }
+.tai-auth__hero .tai-tile__deco { right: -24px; bottom: auto; top: -10px; }
+.tai-auth__hero .tai-tile__deco .lucide { width: 220px; height: 220px; }
+
+.tai-auth__panel .tai-tile__title { font-size: 1.375rem; margin: var(--tai-space-6) 0 var(--tai-space-1); }
+.tai-auth__progress { grid-column: span 2; gap: var(--tai-space-3); }
+.tai-auth__progress .tai-meter { background: rgba(255, 255, 255, 0.6); }
+.tai-auth__progress-value {
+  font-family: var(--tai-font-display);
+  font-size: 1.75rem;
+  line-height: 1;
+  color: var(--tai-black);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-height: 720px) and (min-width: 992px) {
+  .tai-auth__panel { position: static; height: auto; }
+}
+@media (max-width: 991.98px) {
+  .tai-auth { grid-template-columns: minmax(0, 1fr); }
+  .tai-auth__aside { display: none; }
+}
+@media (max-width: 575.98px) {
+  .tai-auth__main { padding: var(--tai-space-4); }
+  .tai-auth__content { padding: var(--tai-space-8) 0; }
+  .tai-auth__demo { font-size: var(--tai-fs-2xs); }
+}
+
+/* Breadcrumb links set by TutorAI.shell.setCrumbs() */
+.tai-crumbs__link { color: var(--tai-text-muted); white-space: nowrap; }
+.tai-crumbs__link:hover { color: var(--tai-black); text-decoration: underline; text-underline-offset: 3px; }
