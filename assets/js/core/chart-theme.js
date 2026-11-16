@@ -25,6 +25,8 @@
   d.color = T.chartColors.text;
   d.borderColor = T.chartColors.grid;
   d.maintainAspectRatio = false;
+  // Settings → Reduce motion (or the OS setting): draw charts without animating
+  if (T.utils && T.utils.reducedMotion()) d.animation = false;
   d.plugins.legend.labels.usePointStyle = true;
   d.plugins.legend.labels.boxWidth = 8;
   d.plugins.legend.labels.boxHeight = 8;

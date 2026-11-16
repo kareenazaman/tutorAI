@@ -14,12 +14,13 @@
 
   async function init() {
     if (document.body.dataset.layout !== 'focus') return;
+    // UX-only sign-in check (core/auth.js); signed-out visitors are sent to sign in
+    const user = await T.auth.requireAuth();
+    if (!user) return;
     document.body.classList.add('tai-focus');
     const main = document.getElementById('page-content');
     if (main) main.setAttribute('tabindex', '-1');
     T.ui.enhance(document);
-    let user = null;
-    try { user = await T.api.users.me('student'); } catch (e) { /* not needed to render */ }
     document.dispatchEvent(new CustomEvent('tutorai:ready', { detail: { layout: 'focus', role: 'student', user } }));
   }
 

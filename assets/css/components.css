@@ -1603,3 +1603,15 @@ a.tai-chat__source:hover { background: var(--tai-gray-50); color: var(--tai-blac
 .tai-chat__suggest.is-block { display: flex; width: 100%; border-radius: var(--tai-radius-md); padding: 10px 12px; }
 .tai-chat__suggest.is-block span { white-space: normal; }
 @media (min-width: 1200px) { .tai-chat--full .tai-chat__welcome .tai-chat__suggest { display: none; } }
+
+/* ---- Choice pills (radio group as equal-width pills) ----------------------
+   <div class="tai-choice" role="radiogroup" style="--tai-choice-cols:4">
+     <label><input type="radio" name="count" value="5"><span>5</span></label> …
+   Used by quiz creation (question count) and Settings (weekly goal). */
+.tai-choice { display: grid; grid-template-columns: repeat(var(--tai-choice-cols, 4), minmax(0, 1fr)); gap: var(--tai-space-2); }
+.tai-choice label { position: relative; }
+.tai-choice input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.tai-choice span { display: block; text-align: center; padding: 9px 0; border-radius: var(--tai-radius-pill); border: 1px solid var(--tai-border-strong); font-weight: var(--tai-fw-semibold); font-size: var(--tai-fs-sm); transition: var(--tai-transition); }
+.tai-choice input:hover + span { border-color: var(--tai-black); }
+.tai-choice input:checked + span { background: var(--tai-black); border-color: var(--tai-black); color: var(--tai-white); }
+.tai-choice input:focus-visible + span { box-shadow: var(--tai-focus-ring); }

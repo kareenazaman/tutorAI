@@ -40,7 +40,6 @@ document.addEventListener('tutorai:ready', () => {
         });
         formEl.reset();   // clears the password fields from the DOM
         success.querySelector('[data-new-name]').textContent = user.firstName;
-        success.querySelector('[data-new-id]').textContent = user.id;
         view.hidden = true;
         success.hidden = false;
         success.focus();

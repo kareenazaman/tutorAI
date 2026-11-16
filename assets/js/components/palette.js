@@ -20,18 +20,13 @@
     const pages = nav.sections.flatMap(s => s.items).map((i, n) => ({
       group: 'Pages', label: i.label, icon: i.icon, tone: TONES[n % TONES.length], href: url(i.href), hint: 'Page'
     }));
-    const actions = role === 'admin'
-      ? [
-          { group: 'Actions', label: 'Invite a user', icon: 'user-plus', tone: 'butter', hint: 'Action', run: () => T.ui.toast({ title: 'Invite a user', message: 'User invites arrive with the User Management stage.' }) },
-          { group: 'Actions', label: 'Open student app', icon: 'graduation-cap', tone: 'lavender', href: url('pages/student/dashboard.html'), hint: 'Switch' }
-        ]
-      : [
+    const actions = [
           { group: 'Actions', label: 'Add a course', icon: 'plus', tone: 'butter', href: url('pages/student/courses.html?new=1'), hint: 'Action' },
           { group: 'Actions', label: 'Upload a lecture', icon: 'upload', tone: 'powder', href: url('pages/student/course-upload.html'), hint: 'Action' },
           { group: 'Actions', label: 'Ask the AI Tutor', icon: 'sparkles', tone: 'lavender', href: url('pages/student/ai-tutor.html'), hint: 'AI' },
           { group: 'Actions', label: 'Create a quiz', icon: 'wand-sparkles', tone: 'sage', href: url('pages/student/quiz-create.html'), hint: 'Action' },
           { group: 'Actions', label: 'See my progress', icon: 'chart-line', tone: 'peach', href: url('pages/student/progress.html'), hint: 'Page' }
-        ];
+    ];
     return [...actions, ...pages, { group: 'Help', label: 'Open the design system', icon: 'palette', tone: 'peach', href: url('pages/styleguide.html'), hint: 'Docs' }];
   }
 

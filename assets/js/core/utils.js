@@ -107,8 +107,25 @@
       return root + path;
     },
 
+    /** Settings → "Reduce motion", or the operating system's reduced-motion setting. */
+    reducedMotion() {
+      return document.documentElement.dataset.motion === 'reduce' ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    },
+
+    /** Apply the reduced-motion preference to <html data-motion> (and remember it on this device). */
+    applyMotion(pref) {
+      if (pref) T.utils.storage.set(T.config.storageKeys.motion, pref);
+      const value = pref || T.utils.storage.get(T.config.storageKeys.motion, 'system');
+      if (value === 'reduce') document.documentElement.dataset.motion = 'reduce';
+      else delete document.documentElement.dataset.motion;
+    },
+
     isMobileLayout() {
       return window.matchMedia(`(max-width: ${T.config.breakpoints.drawer}px)`).matches;
     }
   };
+
+  // Before first paint: honour Settings → Appearance → Reduce motion
+  T.utils.applyMotion();
 })(window.TutorAI);

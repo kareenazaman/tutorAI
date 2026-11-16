@@ -162,7 +162,7 @@
 
     /** Animate numbers up from 0: data-count-to, data-count-decimals, data-count-prefix/suffix. */
     countUp(scope = document) {
-      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const reduce = T.utils.reducedMotion();
       scope.querySelectorAll('[data-count-to]').forEach(el => {
         const to = parseFloat(el.dataset.countTo);
         const dec = el.dataset.countDecimals ? +el.dataset.countDecimals : (to % 1 ? 1 : 0);

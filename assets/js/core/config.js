@@ -51,6 +51,7 @@ TutorAI.config = Object.freeze({
   storageKeys: Object.freeze({
     sidebarCollapsed: 'tai.sidebar.collapsed',   // localStorage
     rememberedEmail:  'tai.auth.email',           // localStorage, "Remember me" on login
+    motion:           'tai.pref.motion',          // localStorage, per-device copy of Settings → reduced motion ('system' | 'reduce')
     mockDb:           'tai.mockdb.v1'             // localStorage, mock store (api.js) — never holds passwords
   }),
 

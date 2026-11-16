@@ -163,6 +163,18 @@ p { margin-bottom: var(--tai-space-4); }
     scroll-behavior: auto !important;
   }
 }
+/* Settings → Appearance → Reduce motion (utils.applyMotion sets html[data-motion]) */
+html[data-motion="reduce"] *, html[data-motion="reduce"] *::before, html[data-motion="reduce"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* App pages stay hidden from first paint until core/auth.js confirms a session
+   (html.tai-auth-ok). UX only — the PHP API is what enforces sign-in. */
+html:not(.tai-auth-ok) body[data-shell]:not([data-auth="optional"]),
+html:not(.tai-auth-ok) body[data-layout="focus"] { visibility: hidden; }
 
 /* Thin, quiet scrollbars */
 * { scrollbar-width: thin; scrollbar-color: var(--tai-border-strong) transparent; }

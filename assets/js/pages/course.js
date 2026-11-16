@@ -437,12 +437,12 @@ document.addEventListener('tutorai:ready', async () => {
     if (tab === 'lectures') bindLectureSearch();
     if (tab === 'quizzes' && highlightQuiz) {
       const row = panel.querySelector(`[data-quiz-id="${CSS.escape(highlightQuiz)}"]`);
-      if (row) { row.classList.add('is-highlighted'); setTimeout(() => row.scrollIntoView({ block: 'center', behavior: 'smooth' }), 250); }
+      if (row) { row.classList.add('is-highlighted'); setTimeout(() => row.scrollIntoView({ block: 'center', behavior: T.utils.reducedMotion() ? 'auto' : 'smooth' }), 250); }
       highlightQuiz = null;
     }
     if (tab === 'lectures' && highlightLecture) {
       const row = panel.querySelector(`[data-lecture-id="${CSS.escape(highlightLecture)}"]`);
-      if (row) { row.classList.add('is-highlighted'); setTimeout(() => row.scrollIntoView({ block: 'center', behavior: 'smooth' }), 250); }
+      if (row) { row.classList.add('is-highlighted'); setTimeout(() => row.scrollIntoView({ block: 'center', behavior: T.utils.reducedMotion() ? 'auto' : 'smooth' }), 250); }
       highlightLecture = null;
     }
   }
@@ -520,7 +520,7 @@ document.addEventListener('tutorai:ready', async () => {
     if (tabLink && !e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
       e.preventDefault();
       goToTab(tabLink.dataset.tab);
-      if (!tabLink.closest('.course-tabs')) $('.course-tabs', root).scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      if (!tabLink.closest('.course-tabs')) $('.course-tabs', root).scrollIntoView({ block: 'nearest', behavior: T.utils.reducedMotion() ? 'auto' : 'smooth' });
       return;
     }
     const action = e.target.closest('[data-action]');
@@ -531,7 +531,7 @@ document.addEventListener('tutorai:ready', async () => {
       pendingChat = { lectureId: action.dataset.id, conversationId: null };
       if (tab === 'ai-tutor' && chatInstance) { chatInstance.startNew({ lectureId: action.dataset.id }); return; }
       goToTab('ai-tutor');
-      $('.course-tabs', root).scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      $('.course-tabs', root).scrollIntoView({ block: 'nearest', behavior: T.utils.reducedMotion() ? 'auto' : 'smooth' });
     }
     else if (action.dataset.action === 'clear-lecture-search') {
       lectureQuery = '';

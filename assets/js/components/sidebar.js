@@ -1,6 +1,6 @@
 /**
  * TutorAI — Sidebar component
- * Renders the student or admin sidebar from TutorAI.navigation.
+ * Renders the student sidebar from TutorAI.navigation.
  */
 (function (T) {
   'use strict';
@@ -24,14 +24,7 @@
       </li>`;
   }
 
-  function footer(role) {
-    if (role === 'admin') {
-      return `
-        <div class="tai-sidebar-card">
-          <div class="tai-sidebar-card__title"><span class="tai-status-dot" aria-hidden="true"></span>All systems normal</div>
-          PHP API, MySQL and the AI service are responding.
-        </div>`;
-    }
+  function footer() {
     return `
       <div class="tai-sidebar-card">
         <div class="tai-sidebar-card__title">${T.ui.icon('sparkles', 'icon-sm')}Stuck on a concept?</div>
@@ -43,7 +36,6 @@
   T.components.Sidebar = {
     render({ role, activeId }) {
       const nav = T.navigation[role];
-      const isAdmin = role === 'admin';
       const sections = nav.sections.map(section => `
         <div class="tai-nav-section">
           <p class="tai-nav-section__title">${escape(section.label)}</p>
@@ -57,7 +49,7 @@
               <img class="tai-brand__mark" src="${escape(url('assets/img/logo-mark.svg'))}" alt="" width="34" height="34">
               <span class="tai-brand__text">
                 <span class="tai-brand__name">TutorAI</span>
-                <span class="tai-brand__tag">${isAdmin ? 'Admin Console' : escape(T.config.tagline)}</span>
+                <span class="tai-brand__tag">${escape(T.config.tagline)}</span>
               </span>
             </a>
             <button type="button" class="btn btn-ghost btn-icon btn-sm tai-sidebar__close" data-action="close-sidebar" aria-label="Close menu">
@@ -65,7 +57,7 @@
             </button>
           </div>
           <nav class="tai-sidebar__nav">${sections}</nav>
-          <div class="tai-sidebar__footer">${footer(role)}</div>
+          <div class="tai-sidebar__footer">${footer()}</div>
         </aside>`;
     }
   };

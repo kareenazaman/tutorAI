@@ -23,7 +23,7 @@ document.addEventListener('tutorai:ready', async () => {
 
   const root = document.querySelector('[data-tutor-root]');
   const tutorUrl = (q = {}) => url(`pages/student/ai-tutor.html${Object.keys(q).length ? `?${new URLSearchParams(q)}` : ''}`);
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduceMotion = T.utils.reducedMotion();
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
   let spaces = [];

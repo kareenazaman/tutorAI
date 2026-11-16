@@ -44,11 +44,26 @@ document.addEventListener('tutorai:ready', async () => {
         <div class="tai-hero__meta">
           <span class="tai-chip">${T.ui.icon('calendar')}${escape(date)}</span>
           <span class="tai-chip">${T.ui.icon('flame')}${streak ? `${streak}-day streak` : 'Start a streak today'}</span>
+          ${goalChip(s.weeklyGoal)}
         </div>
         <h1 class="tai-hero__title" id="dash-greeting">${greeting()}, <em>${escape(s.user.firstName)}</em>.</h1>
         <p class="dash-hero__lead">${lead}</p>
         <span class="tai-tile__deco">${T.ui.icon('sparkles')}</span>
       </section>`;
+  }
+
+  /** Weekly goal (Settings → Weekly study goal): "2 of 4 study days" with a dot per goal day. */
+  function goalChip(g) {
+    if (!g) return '';
+    const done = Math.min(g.studiedDays, g.goalDays);
+    const met = g.studiedDays >= g.goalDays;
+    const dots = Array.from({ length: g.goalDays }, (_, i) => `<span class="dash-goal__dot${i < done ? ' is-done' : ''}"></span>`).join('');
+    return `
+      <a class="tai-chip dash-goal text-reset" href="${escape(url('pages/student/settings.html#goal'))}"
+         aria-label="Weekly goal: ${g.studiedDays} of ${g.goalDays} study days this week${met ? ', reached' : ''}. Change goal">
+        ${T.ui.icon(met ? 'circle-check' : 'target')}<span aria-hidden="true">${Math.min(g.studiedDays, 7)}/${g.goalDays} days this week</span>
+        <span class="dash-goal__dots" aria-hidden="true">${dots}</span>
+      </a>`;
   }
 
   function continueTile(course) {

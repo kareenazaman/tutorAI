@@ -1,7 +1,8 @@
 /**
  * TutorAI — navigation config
  * ------------------------------------------------------------------
- * One source for both sidebars. `id` must match the page's
+ * One source for the sidebar (TutorAI is student-only; the user `role`
+ * field is kept for future use). `id` must match the page's
  * <body data-page="…"> so the shell can highlight the active link
  * and fill in the topbar title. `href` is relative to the project root;
  * the shell prefixes each page's data-root.
@@ -36,31 +37,6 @@
         }
       ],
       searchPlaceholder: 'Search courses, quizzes and notes…'
-    },
-
-    admin: {
-      role: 'admin',
-      label: 'Admin',
-      home: 'pages/admin/dashboard.html',
-      sections: [
-        {
-          label: 'Overview',
-          items: [
-            { id: 'admin-dashboard', label: 'Admin Dashboard',     icon: 'gauge',     href: 'pages/admin/dashboard.html' },
-            { id: 'admin-users',     label: 'User Management',     icon: 'users',     href: 'pages/admin/users.html' },
-            { id: 'admin-courses',   label: 'Course Overview',     icon: 'library',   href: 'pages/admin/courses.html' },
-            { id: 'admin-documents', label: 'Document Management', icon: 'file-text', href: 'pages/admin/documents.html' },
-            { id: 'admin-activity',  label: 'System Activity',     icon: 'activity',  href: 'pages/admin/activity.html' }
-          ]
-        },
-        {
-          label: 'Configuration',
-          items: [
-            { id: 'admin-settings', label: 'Settings', icon: 'settings', href: 'pages/admin/settings.html' }
-          ]
-        }
-      ],
-      searchPlaceholder: 'Search users, courses and documents…'
     }
   };
 

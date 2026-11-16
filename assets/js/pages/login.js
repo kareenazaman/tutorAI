@@ -12,6 +12,31 @@ document.addEventListener('tutorai:ready', () => {
   const formEl = document.getElementById('login-form');
   const submit = formEl.querySelector('[type="submit"]');
 
+  // Why the visitor is here: their account was just deleted, or a page needs sign-in
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('deleted') === '1') {
+    V.formAlert(formEl, { variant: 'success', title: 'Your account was deleted', message: 'Your profile and study data have been removed. You can create a new account at any time.' });
+  } else if (params.get('next')) {
+    V.formAlert(formEl, { variant: 'info', title: 'Please sign in', message: 'Sign in to continue to that page.' });
+  }
+
+  // Demo only: bring back the sample student (e.g. after "Delete account")
+  const resetBtn = document.querySelector('[data-action="reset-demo"]');
+  if (resetBtn) {
+    if (!T.config.useMockData) resetBtn.closest('p').hidden = true;
+    resetBtn.addEventListener('click', async () => {
+      T.ui.setButtonLoading(resetBtn, true);
+      try {
+        await T.api.dev.resetMockData();
+        V.formAlert(formEl, { variant: 'success', title: 'Sample data restored', message: 'Sign in with the demo credentials below.' });
+      } catch (err) {
+        V.formAlert(formEl, { title: 'Couldn’t restore the sample data', message: err.message });
+      } finally {
+        T.ui.setButtonLoading(resetBtn, false);
+      }
+    });
+  }
+
   // Prefill a remembered email
   const remembered = T.utils.storage.get(KEY, null);
   if (remembered) {
@@ -34,8 +59,10 @@ document.addEventListener('tutorai:ready', () => {
         if (values.remember) T.utils.storage.set(KEY, user.email);
         else T.utils.storage.remove(KEY);
 
-        const home = user.role === 'admin' ? 'pages/admin/dashboard.html' : 'pages/student/dashboard.html';
-        window.location.href = T.utils.url(home);
+        // This device follows the account's motion setting (Settings → Appearance)
+        try { T.utils.applyMotion((await T.api.settings.get()).reducedMotion); } catch (e) { /* keep the device default */ }
+        const next = T.auth ? T.auth.safeNext(T.utils.queryParam('next')) : null;
+        window.location.href = T.utils.url(next || 'pages/student/dashboard.html');
       } catch (err) {
         T.ui.setButtonLoading(submit, false);
         formEl.elements.password.value = '';

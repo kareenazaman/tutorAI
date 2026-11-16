@@ -69,7 +69,7 @@
             <img src="${escape(url('assets/img/logo-full.svg'))}" alt="TutorAI" width="134" height="32">
           </a>
           <span class="tai-badge tai-badge--butter tai-auth__demo" title="Sign-in is simulated with mock data until the PHP backend is connected.">
-            ${T.ui.icon('flask-conical')}Demo mode — authentication not connected
+            ${T.ui.icon('flask-conical')}Demo mode — sample sign-in, no real accounts
           </span>
         </header>
         <div class="tai-auth__body"></div>
@@ -87,6 +87,8 @@
 
   function init() {
     if (document.body.dataset.layout !== 'auth') return;
+    // Already signed in? Sign-in and create-account skip straight to the app (core/auth.js)
+    if (T.auth && ['login', 'register'].includes(document.body.dataset.page)) T.auth.redirectIfSignedIn();
     build();
     T.ui.enhance(document);
     document.dispatchEvent(new CustomEvent('tutorai:ready', { detail: { layout: 'auth', page: document.body.dataset.page } }));

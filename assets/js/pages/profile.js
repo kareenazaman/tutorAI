@@ -61,7 +61,7 @@ document.addEventListener('tutorai:ready', (event) => {
   function renderFacts() {
     const fact = (key) => $(`[data-fact="${key}"]`, page);
     fact('id').textContent = user.id;
-    fact('role').innerHTML = `<span class="tai-badge tai-badge--lavender">${T.utils.escape(user.role === 'admin' ? 'Administrator' : 'Student')}</span>`;
+    fact('role').innerHTML = `<span class="tai-badge tai-badge--lavender">Student</span>`;
     fact('created').textContent = formatDate(user.createdAt);
     if (user.lastLoginAt) {
       const at = new Date(user.lastLoginAt);

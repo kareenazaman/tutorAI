@@ -134,7 +134,7 @@ document.addEventListener('tutorai:ready', async () => {
       const card = grid.querySelector(`[data-course-id="${CSS.escape(highlightId)}"]`);
       if (card) {
         card.classList.add('is-new');
-        card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        card.scrollIntoView({ block: 'nearest', behavior: T.utils.reducedMotion() ? 'auto' : 'smooth' });
       }
       highlightId = null;
     }

@@ -16,18 +16,186 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="../../assets/css/main.css" rel="stylesheet">
 </head>
-<body data-shell="student" data-page="settings" data-root="../../">
+<body class="page-settings" data-shell="student" data-page="settings" data-root="../../">
 
-  <main id="page-content" data-placeholder>
-    <!-- Built in a later stage. Remove data-placeholder once real content is added. -->
+  <main id="page-content" aria-busy="true">
+    <header class="tai-page-header">
+      <div>
+        <span class="tai-eyebrow">Personal</span>
+        <h1 class="tai-page-header__title">Settings</h1>
+        <p class="tai-page-header__subtitle">Notifications, your weekly study goal, motion and your data. Changes save as you make them.</p>
+      </div>
+    </header>
+
+    <!-- Announces "Saved" / errors to screen readers -->
+    <p class="visually-hidden" aria-live="polite" data-live></p>
+
+    <div class="row g-4">
+      <div class="col-xl-8 d-flex flex-column gap-4">
+
+        <!-- Notifications -->
+        <section class="tai-card" id="notifications" aria-labelledby="notifications-title">
+          <div class="tai-card__header">
+            <div>
+              <h2 class="tai-card__title" id="notifications-title">Notifications</h2>
+              <p class="tai-card__subtitle">Choose what appears under the bell in the top bar.</p>
+            </div>
+            <span class="tai-badge tai-badge--sage" data-saved="notifications" hidden><i data-lucide="check"></i>Saved</span>
+          </div>
+          <form class="st-list" data-settings-form="notifications" action="/api/settings" method="post" novalidate>
+            <div class="st-row">
+              <div class="st-row__text">
+                <label class="st-row__label" for="st-lecture-ready">Lecture ready</label>
+                <p class="st-row__hint" id="st-lecture-ready-hint">When an uploaded PDF finishes processing and the AI Tutor can use it.</p>
+              </div>
+              <div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" role="switch" id="st-lecture-ready" name="notify_lecture_ready" aria-describedby="st-lecture-ready-hint" disabled></div>
+            </div>
+            <div class="st-row">
+              <div class="st-row__text">
+                <label class="st-row__label" for="st-quiz-ready">New practice quizzes</label>
+                <p class="st-row__hint" id="st-quiz-ready-hint">When TutorAI writes a quiz for you from your lectures.</p>
+              </div>
+              <div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" role="switch" id="st-quiz-ready" name="notify_quiz_ready" aria-describedby="st-quiz-ready-hint" disabled></div>
+            </div>
+            <div class="st-row">
+              <div class="st-row__text">
+                <label class="st-row__label" for="st-weekly">Weekly progress summary</label>
+                <p class="st-row__hint" id="st-weekly-hint">A Monday recap of your quiz results and study days.</p>
+              </div>
+              <div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" role="switch" id="st-weekly" name="notify_weekly_summary" aria-describedby="st-weekly-hint" disabled></div>
+            </div>
+            <div class="st-row">
+              <div class="st-row__text">
+                <label class="st-row__label" for="st-reminders">Study reminders</label>
+                <p class="st-row__hint" id="st-reminders-hint">A nudge when you’re behind on your weekly goal.</p>
+              </div>
+              <div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" role="switch" id="st-reminders" name="notify_study_reminders" aria-describedby="st-reminders-hint" disabled></div>
+            </div>
+          </form>
+        </section>
+
+        <!-- Weekly goal -->
+        <section class="tai-card" id="goal" aria-labelledby="goal-title">
+          <div class="tai-card__header">
+            <div>
+              <h2 class="tai-card__title" id="goal-title">Weekly study goal</h2>
+              <p class="tai-card__subtitle">Shown on your dashboard. Any day you read a lecture, ask the AI Tutor or submit a quiz counts.</p>
+            </div>
+            <span class="tai-badge tai-badge--sage" data-saved="goal" hidden><i data-lucide="check"></i>Saved</span>
+          </div>
+          <form data-settings-form="goal" action="/api/settings" method="post" novalidate>
+            <fieldset class="tai-field mb-0">
+              <legend class="form-label">Study days per week</legend>
+              <div class="tai-choice" role="radiogroup" aria-label="Study days per week" style="--tai-choice-cols:7">
+                <label><input type="radio" name="weekly_goal_days" value="1" disabled><span>1</span></label>
+                <label><input type="radio" name="weekly_goal_days" value="2" disabled><span>2</span></label>
+                <label><input type="radio" name="weekly_goal_days" value="3" disabled><span>3</span></label>
+                <label><input type="radio" name="weekly_goal_days" value="4" disabled><span>4</span></label>
+                <label><input type="radio" name="weekly_goal_days" value="5" disabled><span>5</span></label>
+                <label><input type="radio" name="weekly_goal_days" value="6" disabled><span>6</span></label>
+                <label><input type="radio" name="weekly_goal_days" value="7" disabled><span>7</span></label>
+              </div>
+            </fieldset>
+            <p class="st-goal" data-goal-status><span class="tai-skeleton tai-skeleton--text d-inline-block" style="width:14rem"></span></p>
+          </form>
+        </section>
+
+        <!-- Appearance -->
+        <section class="tai-card" id="appearance" aria-labelledby="appearance-title">
+          <div class="tai-card__header">
+            <div>
+              <h2 class="tai-card__title" id="appearance-title">Appearance</h2>
+              <p class="tai-card__subtitle">Animations include page fades, counting numbers and chart transitions.</p>
+            </div>
+            <span class="tai-badge tai-badge--sage" data-saved="appearance" hidden><i data-lucide="check"></i>Saved</span>
+          </div>
+          <form data-settings-form="appearance" action="/api/settings" method="post" novalidate>
+            <fieldset class="mb-0">
+              <legend class="form-label">Motion</legend>
+              <div class="st-options">
+                <label class="st-option">
+                  <input class="form-check-input" type="radio" name="reduced_motion" value="system" disabled>
+                  <span><span class="st-option__title">Match my device</span><span class="st-option__hint" data-device-motion>Uses your operating system’s setting.</span></span>
+                </label>
+                <label class="st-option">
+                  <input class="form-check-input" type="radio" name="reduced_motion" value="reduce" disabled>
+                  <span><span class="st-option__title">Reduce motion</span><span class="st-option__hint">Turn off animations everywhere in TutorAI.</span></span>
+                </label>
+              </div>
+            </fieldset>
+          </form>
+        </section>
+      </div>
+
+      <div class="col-xl-4 d-flex flex-column gap-4">
+        <!-- Privacy -->
+        <section class="tai-card" id="privacy" aria-labelledby="privacy-title">
+          <div class="tai-card__header">
+            <div>
+              <h2 class="tai-card__title" id="privacy-title">Privacy</h2>
+              <p class="tai-card__subtitle">Your data is only used to help you study.</p>
+            </div>
+            <span class="tai-icon-tile tai-icon-tile--powder" aria-hidden="true"><i data-lucide="shield"></i></span>
+          </div>
+          <div class="st-action">
+            <div>
+              <p class="st-row__label mb-1">Download my data</p>
+              <p class="st-row__hint">Profile, settings, courses, lecture text, quizzes, attempts, AI Tutor chats and activity as a JSON file.</p>
+            </div>
+            <button type="button" class="btn btn-secondary w-100" data-action="export"><i data-lucide="download"></i><span>Download JSON</span></button>
+          </div>
+          <hr class="my-4">
+          <div class="st-action">
+            <div>
+              <p class="st-row__label mb-1">Delete all my AI Tutor chats</p>
+              <p class="st-row__hint" data-chat-count>Every conversation in every course, with its messages.</p>
+            </div>
+            <button type="button" class="btn btn-secondary w-100" data-action="delete-chats"><i data-lucide="message-square-x"></i><span>Delete all chats</span></button>
+          </div>
+        </section>
+
+        <!-- Danger zone -->
+        <section class="tai-card st-danger" id="danger" aria-labelledby="danger-title">
+          <div class="tai-card__header">
+            <div>
+              <h2 class="tai-card__title" id="danger-title">Danger zone</h2>
+              <p class="tai-card__subtitle">Deleting your account removes your profile, courses, lectures, quizzes, results and chats. This can’t be undone.</p>
+            </div>
+          </div>
+          <button type="button" class="btn btn-danger w-100" data-action="delete-account" data-bs-toggle="modal" data-bs-target="#delete-account-modal"><i data-lucide="trash-2"></i><span>Delete account</span></button>
+          <p class="st-row__hint mt-3 mb-0"><span class="tai-badge tai-badge--outline tai-badge--sm">Demo</span> In this demo only this browser’s sample data is removed.</p>
+        </section>
+      </div>
+    </div>
+
+    <!-- Delete account: type DELETE to confirm -->
+    <div class="modal fade" id="delete-account-modal" tabindex="-1" aria-labelledby="delete-account-title" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" style="max-width:460px">
+        <form class="modal-content" id="delete-account-form" action="/api/account" method="post" novalidate>
+          <div class="modal-header">
+            <div>
+              <h2 class="modal-title" id="delete-account-title">Delete your account?</h2>
+              <p class="modal-subtitle">Everything you’ve added to TutorAI will be deleted and you’ll be signed out. This can’t be undone.</p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div data-form-status></div>
+          <div class="tai-field mb-0">
+            <label class="form-label" for="delete-confirm">Type <span class="tai-mono">DELETE</span> to confirm</label>
+            <input id="delete-confirm" name="confirm" type="text" class="form-control" autocomplete="off" autocapitalize="characters" spellcheck="false" required>
+          </div>
+          <div class="modal-footer mt-4">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-danger"><i data-lucide="trash-2"></i><span>Delete account</span></button>
+          </div>
+        </form>
+      </div>
+    </div>
   </main>
 
   <!-- Vendor -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-  <!-- Chart.js — only on pages with charts:
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="../../assets/js/core/chart-theme.js"></script> -->
+  <script src="https://unpkg.com/lucide@1.73.0/dist/umd/lucide.min.js"></script>
 
   <!-- TutorAI core (order matters) -->
   <script src="../../assets/js/core/config.js"></script>
@@ -38,13 +206,16 @@
   <script src="../../assets/js/services/mock-ai.js"></script>
   <script src="../../assets/js/services/quiz-engine.js"></script>
   <script src="../../assets/js/services/api.js"></script>
+  <script src="../../assets/js/core/auth.js"></script>
   <script src="../../assets/js/components/ui.js"></script>
+  <script src="../../assets/js/core/validation.js"></script>
   <script src="../../assets/js/components/sidebar.js"></script>
   <script src="../../assets/js/components/notifications.js"></script>
   <script src="../../assets/js/components/topbar.js"></script>
   <script src="../../assets/js/components/palette.js"></script>
   <script src="../../assets/js/core/shell.js"></script>
 
-  <!-- Page script (optional): ../../assets/js/pages/<page>.js -->
+  <!-- Page script -->
+  <script src="../../assets/js/pages/settings.js"></script>
 </body>
 </html>

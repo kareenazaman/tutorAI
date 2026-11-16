@@ -438,7 +438,7 @@ document.addEventListener('tutorai:ready', async () => {
         const tools = bootstrap.Offcanvas.getInstance(document.getElementById('lw-tools'));
         if (tools) tools.hide();
         goToPage(target.searchParams.get('page'), { flash: true, force: true });
-        $('.lw-viewer', root).scrollIntoView({ block: 'start', behavior: 'smooth' });
+        $('.lw-viewer', root).scrollIntoView({ block: 'start', behavior: T.utils.reducedMotion() ? 'auto' : 'smooth' });
         return;
       }
     }

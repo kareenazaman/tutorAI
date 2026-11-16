@@ -19,8 +19,9 @@
  *     snake_case columns (first_name → firstName) before responding.
  *   • Dates are ISO-8601 strings in UTC.
  *   • Foreign keys end in Id:  courseId, userId, lectureId.
- *   • Enum values are lowercase strings: 'student' | 'admin',
- *     'active' | 'archived', 'uploading' | 'ready' …
+ *   • Enum values are lowercase strings: 'active' | 'archived',
+ *     'uploading' | 'ready' … users.role is always 'student' (kept for
+ *     future use; TutorAI has no other account type).
  *   • Calculated fields (course.lectureCount, course.progress) are
  *     never stored; the API adds them to each response.
  */
@@ -54,20 +55,6 @@
         createdAt: '2026-09-02T16:00:00Z',
         lastLoginAt: ago(60 * 19),
         status: 'active'
-      },
-      {
-        id: 'usr_9001',
-        role: 'admin',
-        firstName: 'Daniel',
-        lastName: 'Okafor',
-        email: 'd.okafor@tutorai.app',
-        title: 'Platform Administrator',
-        avatarUrl: null,
-        avatarColor: 'navy',
-        bio: '',
-        createdAt: '2026-08-15T16:00:00Z',
-        lastLoginAt: ago(60 * 3),
-        status: 'active'
       }
     ],
 
@@ -82,10 +69,16 @@
       takenEmails: ['taken@tutorai.app']       // always "already registered"
     },
 
-    /** Which mock user is "signed in" for each shell */
+    /** The demo student. Seeded quizzes, attempts, chats and activity belong to this account. */
+    demoUserId: 'usr_1001',
+
+    /**
+     * Who is signed in (mock stand-in for the PHP session). A fresh store
+     * starts signed out; signing in sets userId, signing out clears it.
+     * Holds only an id — never a password or token.
+     */
     session: {
-      student: 'usr_1001',
-      admin: 'usr_9001'
+      userId: null
     },
 
     /** courses — owned by a student (courses.user_id) */
@@ -191,11 +184,7 @@
       { id: 'ntf_5001', userId: 'usr_1001', type: 'quiz',     title: 'New practice quiz ready',     message: 'TutorAI generated 8 questions from “Gradient descent”.',            link: 'pages/student/course.html?id=crs_2003&tab=quizzes',  isRead: false, createdAt: ago(12) },
       { id: 'ntf_5002', userId: 'usr_1001', type: 'lecture',  title: 'Lecture ready',               message: '“REST APIs with PHP” is ready for the AI Tutor.',                   link: 'pages/student/course.html?id=crs_2001&tab=lectures', isRead: false, createdAt: daysAgo(1, 10) },
       { id: 'ntf_5003', userId: 'usr_1001', type: 'progress', title: 'Weekly progress summary',     message: 'You studied 6h 40m this week — up 18% from last week.',             link: 'pages/student/progress.html', isRead: true, createdAt: daysAgo(1, 8) },
-      { id: 'ntf_5004', userId: 'usr_1001', type: 'system',   title: 'Welcome to TutorAI',          message: 'Add your first course to get personalised study help.',             link: 'pages/student/courses.html', isRead: true, createdAt: daysAgo(6, 9) },
-
-      { id: 'ntf_5101', userId: 'usr_9001', type: 'user',     title: '14 new student sign-ups',     message: 'Registrations are up this week across 3 institutions.',             link: 'pages/admin/users.html', isRead: false, createdAt: ago(30) },
-      { id: 'ntf_5102', userId: 'usr_9001', type: 'alert',    title: 'Lecture processing delayed',  message: '3 uploads have been queued for more than 10 minutes.',              link: 'pages/admin/documents.html', isRead: false, createdAt: ago(70) },
-      { id: 'ntf_5103', userId: 'usr_9001', type: 'system',   title: 'AI service healthy',          message: 'FastAPI response time averaged 420 ms over the last 24h.',          link: 'pages/admin/activity.html', isRead: true, createdAt: ago(60 * 9) }
+      { id: 'ntf_5004', userId: 'usr_1001', type: 'system',   title: 'Welcome to TutorAI',          message: 'Add your first course to get personalised study help.',             link: 'pages/student/courses.html', isRead: true, createdAt: daysAgo(6, 9) }
     ]
   };
 })(window.TutorAI);

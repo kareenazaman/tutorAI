@@ -31,7 +31,7 @@
   const C = T.components;
 
   let app;       // .tai-app root
-  let role;      // 'student' | 'admin'
+  let role;      // always 'student' (navigation key)
   let tooltips = [];
 
   /* ---- Build -------------------------------------------------------------- */
@@ -76,7 +76,7 @@
     const stage = content.dataset.stage;
     const home = T.navigation[role].home;
     content.innerHTML = `
-      ${T.ui.pageHeader({ eyebrow: role === 'admin' ? 'Admin' : 'Workspace', title })}
+      ${T.ui.pageHeader({ eyebrow: 'Workspace', title })}
       <div class="tai-card">
         ${T.ui.emptyState({
           icon: (T.navigation.find(role, document.body.dataset.page) || { item: { icon: 'layout-dashboard' } }).item.icon,
@@ -149,8 +149,6 @@
         C.Palette.open();
       } else if (action === 'mark-all-read') {
         markAllRead(target);
-      } else if (action === 'view-all-notifications') {
-        T.ui.toast({ title: 'Coming soon', message: 'A full notifications page will be added in a later stage.' });
       } else if (action === 'sign-out') {
         signOut(target);
       } else if (action === 'reset-demo-data') {
@@ -187,7 +185,7 @@
   async function loadNotifications() {
     const listEl = $('[data-notification-list]', app);
     try {
-      const items = await T.api.notifications.list(role);
+      const items = await T.api.notifications.list();
       renderNotifications(items);
     } catch (err) {
       listEl.innerHTML = T.ui.emptyState({ icon: 'circle-alert', title: 'Could not load notifications', text: err.message, compact: true, tone: 'pink' });
@@ -211,8 +209,8 @@
     T.ui.setButtonLoading(button, true);
     let items = null;
     try {
-      await T.api.notifications.markAllRead(role);
-      items = await T.api.notifications.list(role);
+      await T.api.notifications.markAllRead();
+      items = await T.api.notifications.list();
     } catch (err) {
       T.ui.toast({ title: 'Could not update notifications', message: err.message, variant: 'danger' });
     } finally {
@@ -271,7 +269,7 @@
   }
 
   async function loadUser() {
-    const user = await T.api.users.me(role);
+    const user = await T.api.users.me();
     C.Topbar.setUser(app, user);
     return user;
   }
@@ -279,6 +277,9 @@
   /* ---- Boot --------------------------------------------------------------- */
   async function init() {
     if (!document.body.dataset.shell || !T.navigation[document.body.dataset.shell]) return;
+    // UX-only sign-in check (core/auth.js). The PHP API enforces sessions server-side.
+    const signedIn = await T.auth.requireAuth();
+    if (!signedIn && document.body.dataset.auth !== 'optional') return;
     build();
     initSidebarState();
     bindEvents();

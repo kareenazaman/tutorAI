@@ -9,12 +9,7 @@
   const { escape, url, initials, fullName } = T.utils;
   T.components = T.components || {};
 
-  function profileMenu(role) {
-    if (role === 'admin') {
-      return `
-        <li><a class="dropdown-item" href="${escape(url('pages/admin/settings.html'))}">${T.ui.icon('settings')}Settings</a></li>
-        <li><a class="dropdown-item" href="${escape(url('pages/student/dashboard.html'))}">${T.ui.icon('graduation-cap')}View student app</a></li>`;
-    }
+  function profileMenu() {
     return `
       <li><a class="dropdown-item" href="${escape(url('pages/student/profile.html'))}">${T.ui.icon('user')}My Profile</a></li>
       <li><a class="dropdown-item" href="${escape(url('pages/student/settings.html'))}">${T.ui.icon('settings')}Settings</a></li>
@@ -66,7 +61,7 @@
                   ${T.ui.skeleton('list', 3)}
                 </div>
                 <div class="tai-dropdown-panel__footer">
-                  <button type="button" class="btn btn-ghost btn-sm w-100" data-action="view-all-notifications">View all notifications</button>
+                  <a class="btn btn-ghost btn-sm w-100" href="${escape(url('pages/student/settings.html#notifications'))}">${T.ui.icon('settings', 'icon-sm')}Notification settings</a>
                 </div>
               </div>
             </div>
@@ -76,7 +71,7 @@
                 <span class="tai-avatar" data-user-avatar></span>
                 <span class="tai-profile-btn__text">
                   <span class="tai-profile-btn__name" data-user-name>&nbsp;</span>
-                  <span class="tai-profile-btn__role">${role === 'admin' ? 'Administrator' : 'Student'}</span>
+                  <span class="tai-profile-btn__role">Student</span>
                 </span>
                 ${T.ui.icon('chevron-down')}
               </button>
@@ -89,7 +84,7 @@
                   </span>
                 </li>
                 <li><hr class="dropdown-divider"></li>
-                ${profileMenu(role)}
+                ${profileMenu()}
                 <li><hr class="dropdown-divider"></li>
                 <li><button type="button" class="dropdown-item text-danger" data-action="sign-out">${T.ui.icon('log-out')}Sign out</button></li>
               </ul>

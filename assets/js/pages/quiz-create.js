@@ -90,7 +90,7 @@ document.addEventListener('tutorai:ready', async () => {
               <div class="row gx-3">
                 <fieldset class="col-md-6 tai-field">
                   <legend class="form-label">Number of questions</legend>
-                  <div class="qc-choice" role="radiogroup" aria-label="Number of questions">
+                  <div class="tai-choice" role="radiogroup" aria-label="Number of questions">
                     ${[5, 10, 15, 20].map(n => `<label><input type="radio" name="count" value="${n}"${n === 10 ? ' checked' : ''}><span>${n}</span></label>`).join('')}
                   </div>
                 </fieldset>

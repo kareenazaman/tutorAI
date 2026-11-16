@@ -433,12 +433,6 @@
 .page-quiz-create .qc-all { padding-bottom: var(--tai-space-2); margin-bottom: var(--tai-space-2); border-bottom: 1px solid var(--tai-border); }
 .page-quiz-create .qc-lectures { display: grid; gap: 4px; max-height: 220px; overflow-y: auto; }
 .page-quiz-create .qc-types { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px var(--tai-space-4); }
-.page-quiz-create .qc-choice { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--tai-space-2); }
-.page-quiz-create .qc-choice label { position: relative; }
-.page-quiz-create .qc-choice input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-.page-quiz-create .qc-choice span { display: block; text-align: center; padding: 9px 0; border-radius: var(--tai-radius-pill); border: 1px solid var(--tai-border-strong); font-weight: var(--tai-fw-semibold); font-size: var(--tai-fs-sm); transition: var(--tai-transition); }
-.page-quiz-create .qc-choice input:checked + span { background: var(--tai-black); border-color: var(--tai-black); color: var(--tai-white); }
-.page-quiz-create .qc-choice input:focus-visible + span { box-shadow: var(--tai-focus-ring); }
 .page-quiz-create .qc-summary { position: sticky; top: calc(var(--tai-topbar-h) + var(--tai-space-4)); }
 .page-quiz-create .qc-summary__list { display: grid; gap: var(--tai-space-3); margin: 0; }
 .page-quiz-create .qc-summary__list dt { font-size: var(--tai-fs-xs); font-weight: var(--tai-fw-medium); color: var(--tai-text-muted); }
@@ -549,3 +543,53 @@ body.tai-focus { background: var(--tai-gray-50); }
 .page-progress .pg-chart__table { margin-top: var(--tai-space-4); max-height: 320px; overflow: auto; }
 .page-progress .pg-chart__table .tai-table th[scope="row"] { font-weight: var(--tai-fw-medium); }
 @media (max-width: 575.98px) { .page-progress .pg-chart__box { height: 240px; } }
+
+/* ==========================================================================
+   Settings (stage 6)
+   ========================================================================== */
+.page-settings .st-list { display: grid; }
+.page-settings .st-row { display: flex; align-items: center; justify-content: space-between; gap: var(--tai-space-4); padding: var(--tai-space-4) 0; border-top: 1px solid var(--tai-border); }
+.page-settings .st-row:first-child { border-top: 0; padding-top: 0; }
+.page-settings .st-row:last-child { padding-bottom: 0; }
+.page-settings .st-row__text { min-width: 0; }
+.page-settings .st-row__label { display: block; font-weight: var(--tai-fw-semibold); color: var(--tai-black); margin: 0 0 2px; }
+.page-settings .st-row__hint { font-size: var(--tai-fs-sm); color: var(--tai-text-muted); margin: 0; }
+.page-settings .form-switch .form-check-input { margin: 0; cursor: pointer; }
+.page-settings .st-goal { display: flex; align-items: center; gap: var(--tai-space-2); margin: var(--tai-space-4) 0 0; font-size: var(--tai-fs-sm); color: var(--tai-text-muted); }
+.page-settings .st-goal strong { color: var(--tai-black); }
+.page-settings .st-options { display: grid; gap: var(--tai-space-3); grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+.page-settings .st-option { display: flex; gap: var(--tai-space-3); align-items: flex-start; padding: var(--tai-space-4); border: 1px solid var(--tai-border-strong); border-radius: var(--tai-radius-lg); cursor: pointer; transition: var(--tai-transition); }
+.page-settings .st-option:hover { border-color: var(--tai-black); }
+.page-settings .st-option:has(input:checked) { border-color: var(--tai-black); box-shadow: inset 0 0 0 1px var(--tai-black); background: var(--tai-lavender); }
+.page-settings .st-option .form-check-input { margin: 3px 0 0; flex-shrink: 0; }
+.page-settings .st-option__title { display: block; font-weight: var(--tai-fw-semibold); color: var(--tai-black); }
+.page-settings .st-option__hint { display: block; font-size: var(--tai-fs-sm); color: var(--tai-text-muted); }
+.page-settings .st-action { display: grid; gap: var(--tai-space-3); }
+.page-settings .st-danger { border-color: var(--tai-pink-ink); }
+.page-settings [data-settings-form][aria-busy="true"] { opacity: .7; }
+@media (max-width: 575.98px) {
+  .page-settings .tai-choice { --tai-choice-cols: 7; gap: 4px; }
+}
+
+/* Dashboard: weekly goal chip (Settings → Weekly study goal) */
+.page-dashboard .dash-goal { gap: 6px; color: var(--tai-black) !important; }
+.page-dashboard .dash-goal:hover { background: var(--tai-white); }
+.page-dashboard .dash-goal__dots { display: inline-flex; gap: 3px; margin-left: 2px; }
+.page-dashboard .dash-goal__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--tai-border-strong); }
+.page-dashboard .dash-goal__dot.is-done { background: var(--tai-black); }
+
+/* ==========================================================================
+   404 (pages/404.html) — static, no shell
+   ========================================================================== */
+.page-404 { min-height: 100vh; display: grid; place-items: center; padding: var(--tai-space-6) var(--tai-space-4); background: var(--tai-bg, var(--tai-white)); }
+.page-404 .nf { width: 100%; max-width: 760px; }
+.page-404 .nf__brand { display: inline-block; margin-bottom: var(--tai-space-6); }
+.page-404 .nf__tile { position: relative; overflow: hidden; padding: clamp(1.75rem, 5vw, 3.5rem); }
+.page-404 .nf__code { font-family: var(--tai-font-display, 'DM Serif Display', serif); font-size: clamp(4.5rem, 16vw, 8rem); line-height: .9; margin: 0 0 var(--tai-space-3); color: var(--tai-lavender-ink); }
+.page-404 .nf__title { font-size: clamp(2rem, 5.5vw, 3.25rem); margin: 0 0 var(--tai-space-3); }
+.page-404 .nf__lead { max-width: 44ch; color: var(--tai-black); margin: 0 0 var(--tai-space-6); }
+.page-404 .nf__actions { display: flex; flex-wrap: wrap; gap: var(--tai-space-3); position: relative; z-index: 1; }
+.page-404 .nf__tile .tai-tile__deco { right: 24px; bottom: -36px; }
+.page-404 .nf__links { display: flex; flex-wrap: wrap; gap: var(--tai-space-2) var(--tai-space-5); margin-top: var(--tai-space-6); font-size: var(--tai-fs-sm); }
+.page-404 .nf__links a { color: var(--tai-text-muted); text-decoration: underline; text-underline-offset: 3px; }
+.page-404 .nf__links a:hover { color: var(--tai-black); }

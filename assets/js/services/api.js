@@ -54,8 +54,8 @@
   const STORE_VERSION = 1;
   /** Tables every store has had since stage 3. */
   const CORE_TABLES = ['users', 'session', 'courses', 'lectures', 'quizzes', 'activity', 'notifications'];
-  /** Stage 4–5 tables — added in place to older stores (see migrate()). */
-  const AI_TABLES = ['lectureContent', 'conversations', 'messages', 'summaries', 'notes', 'attempts'];
+  /** Stage 4–6 tables — added in place to older stores (see migrate()). */
+  const AI_TABLES = ['lectureContent', 'conversations', 'messages', 'summaries', 'notes', 'attempts', 'settings'];
   const TABLES = [...CORE_TABLES, ...AI_TABLES];
   const fixtures = T.mockData.auth;          // demo password etc. — memory only, never saved
 
@@ -88,6 +88,15 @@
   function migrate(data) {
     let changed = false;
     AI_TABLES.forEach(t => { if (!Array.isArray(data[t])) { data[t] = []; changed = true; } });
+    // Stage 6: one { userId } session (was one per shell); student accounts only
+    if (!('userId' in data.session)) { data.session = { userId: data.session.student || null }; changed = true; }
+    const others = data.users.filter(u => u.role !== 'student').map(u => u.id);
+    if (others.length) {
+      data.users = data.users.filter(u => !others.includes(u.id));
+      data.notifications = data.notifications.filter(n => !others.includes(n.userId));
+      if (others.includes(data.session.userId)) data.session.userId = null;
+      changed = true;
+    }
     return changed;
   }
 
@@ -166,6 +175,10 @@
       if (typeof mock !== 'function') {
         return Promise.reject(new ApiError(`No mock handler for ${method} ${path}`, 501));
       }
+      // Like the PHP session check: everything outside /auth needs a signed-in user
+      if (!path.startsWith('/auth/') && !me()) {
+        return wait(latency ?? cfg.mockLatencyMs).then(() => { throw new ApiError('Please sign in to continue.', 401); });
+      }
       return fromMock(method, mock, { latency });
     }
     return fromHttp(method, path, { body, base });
@@ -175,7 +188,14 @@
      Mock helpers
      ====================================================================== */
   const userById = (id) => db.users.find(u => u.id === id);
-  const sessionUser = (role = 'student') => userById(db.session[role] || db.session.student);
+  /**
+   * The signed-in user. In mock mode db.session.userId plays the PHP session
+   * (a server-side session keyed by an httpOnly cookie in production).
+   * actingUserId is set only while seed data is generated for the demo student.
+   */
+  let actingUserId = null;
+  const me = () => actingUserId || (db.session && db.session.userId) || null;
+  const sessionUser = () => userById(me()) || null;
   const notFound = (entity, id) => new ApiError(`${entity} not found`, 404, { id });
   const normEmail = (email) => String(email || '').trim().toLowerCase();
   const userByEmail = (email) => db.users.find(u => normEmail(u.email) === normEmail(email));
@@ -208,7 +228,7 @@
 
   /* ---- Courses ------------------------------------------------------------ */
   const COURSE_COLORS = ['lavender', 'powder', 'sage', 'butter', 'pink', 'peach'];
-  const myCourses = () => db.courses.filter(c => c.userId === sessionUser('student').id);
+  const myCourses = () => db.courses.filter(c => c.userId === me());
   const findCourse = (id) => myCourses().find(c => c.id === id);
   const courseLectures = (courseId) => db.lectures.filter(l => l.courseId === courseId);
   const courseQuizzes = (courseId) => db.quizzes.filter(q => q.courseId === courseId);
@@ -323,11 +343,31 @@
    * quiz_submitted | chat_message | notes_generated
    */
   function logActivity(type, courseId, title, refId = null) {
-    db.activity.push({ id: nextId('act', db.activity), userId: sessionUser('student').id, type, courseId, refId, title, createdAt: nowIso() });
+    db.activity.push({ id: nextId('act', db.activity), userId: me(), type, courseId, refId, title, createdAt: nowIso() });
   }
 
   function notify(type, title, message, link) {
-    db.notifications.push({ id: nextId('ntf', db.notifications), userId: sessionUser('student').id, type, title, message, link, isRead: false, createdAt: nowIso() });
+    const prefs = userSettings(me()).notifications;
+    if (prefs[NOTIFY_PREF[type]] === false) return;
+    db.notifications.push({ id: nextId('ntf', db.notifications), userId: me(), type, title, message, link, isRead: false, createdAt: nowIso() });
+  }
+
+  /* ---- Settings (user_settings) ------------------------------------------ */
+  const DEFAULT_SETTINGS = Object.freeze({
+    notifications: { lectureReady: true, quizReady: true, weeklySummary: true, studyReminders: false },
+    weeklyGoalDays: 4,                       // study days per week (1–7), shown on the dashboard
+    reducedMotion: 'system'                  // 'system' (follow the device) | 'reduce' (always)
+  });
+  /** Notification type → the setting that switches it off. */
+  const NOTIFY_PREF = { lecture: 'lectureReady', quiz: 'quizReady', progress: 'weeklySummary', reminder: 'studyReminders' };
+  function userSettings(userId) {
+    const row = db.settings.find(x => x.userId === userId) || {};
+    return {
+      notifications: { ...DEFAULT_SETTINGS.notifications, ...(row.notifications || {}) },
+      weeklyGoalDays: row.weeklyGoalDays || DEFAULT_SETTINGS.weeklyGoalDays,
+      reducedMotion: row.reducedMotion || DEFAULT_SETTINGS.reducedMotion,
+      updatedAt: row.updatedAt || null
+    };
   }
 
   const ACTIVITY_TAB = { lecture_uploaded: 'lectures', lecture_failed: 'lectures', lecture_deleted: 'lectures', quiz_created: 'quizzes', quiz_submitted: 'quizzes', notes_generated: 'lectures' };
@@ -361,6 +401,14 @@
     return streak;
   }
 
+  /** Study days so far this week (Monday start) against the student's weekly goal. */
+  function weeklyGoal(userId) {
+    const start = new Date(); start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+    const days = new Set(db.activity.filter(a => a.userId === userId && new Date(a.createdAt) >= start).map(a => dayKey(a.createdAt)));
+    return { goalDays: userSettings(userId).weeklyGoalDays, studiedDays: days.size, weekStart: start.toISOString() };
+  }
+
   const courseRef = (c) => (c ? { id: c.id, code: c.code, title: c.title, color: c.color } : null);
 
   /* ======================================================================
@@ -378,7 +426,6 @@
      Every score is recomputed from answers vs correct answers (quiz-engine.js).
      ====================================================================== */
   const E = T.quizEngine;
-  const me = () => sessionUser('student').id;
   const quizById = (id) => db.quizzes.find(q => q.id === id);
   const myQuiz = (id) => { const q = quizById(id); return q && findCourse(q.courseId) ? q : null; };
   const lectureTopic = (lectureId) => { const l = db.lectures.find(x => x.id === lectureId); return l ? (l.topic || l.title) : null; };
@@ -678,7 +725,7 @@
   const MAX_MESSAGE = 2000;
   const findConversation = (id) => {
     const c = db.conversations.find(x => x.id === id);
-    return c && c.userId === sessionUser('student').id && findCourse(c.courseId) ? c : null;
+    return c && c.userId === me() && findCourse(c.courseId) ? c : null;
   };
   const conversationMessages = (id) => db.messages.filter(m => m.conversationId === id).sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id));
 
@@ -841,7 +888,7 @@
   /** Sample conversations, generated once the mock AI and lecture text are loaded. */
   function seedConversations() {
     if (db.meta.seededConversations || !T.mockAI) return false;
-    const me = sessionUser('student');
+    const owner = T.mockData.demoUserId;
     const plan = [
       { courseId: 'crs_2001', lectureId: 'lec_3003', minutesAgo: 95, ask: ['How do PHP sessions work?', 'Test my understanding of session security'] },
       { courseId: 'crs_2002', lectureId: null, minutesAgo: 60 * 24 * 3, ask: ['Explain the difference between 2NF and 3NF simply'] }
@@ -850,7 +897,7 @@
     plan.forEach(x => {
       let t = Date.now() - x.minutesAgo * 60000;
       const at = () => new Date(t += 20000).toISOString();
-      const conv = { id: nextId('conv', db.conversations), userId: me.id, courseId: x.courseId, lectureId: x.lectureId, title: x.ask[0], createdAt: new Date(t).toISOString(), updatedAt: new Date(t).toISOString() };
+      const conv = { id: nextId('conv', db.conversations), userId: owner, courseId: x.courseId, lectureId: x.lectureId, title: x.ask[0], createdAt: new Date(t).toISOString(), updatedAt: new Date(t).toISOString() };
       db.conversations.push(conv);
       x.ask.forEach(q => {
         const history = conversationMessages(conv.id);
@@ -869,6 +916,12 @@
    */
   function ensureContent() {
     if (!db) return;
+    // Seed rows (sample quizzes, attempts, activity, chats) belong to the demo student
+    actingUserId = T.mockData.demoUserId;
+    try { ensureContentAsDemo(); } finally { actingUserId = null; }
+  }
+
+  function ensureContentAsDemo() {
     const seedContent = T.mockLectureContent || null;
     let changed = false;
     db.lectures.forEach(l => {
@@ -931,6 +984,7 @@
           }
           if (user.status !== 'active') return new ApiError('This account has been suspended.', 403);
           user.lastLoginAt = nowIso();
+          db.session.userId = user.id;       // PHP: session_regenerate_id(); $_SESSION['user_id'] = …
           return user;
         }
       }),
@@ -954,6 +1008,7 @@
             avatarUrl: null, avatarColor: 'powder', createdAt: now, lastLoginAt: now, status: 'active'
           };
           db.users.push(user);   // the password is discarded, never stored
+          db.session.userId = user.id;       // signed in straight away, like register.php will do
           return user;
         }
       }),
@@ -981,26 +1036,29 @@
       }),
 
       /** POST /api/auth/logout → api/auth/logout.php (destroys the PHP session) */
-      logout: () => request('POST', '/auth/logout', { mock: () => ({ ok: true }) })
+      logout: () => request('POST', '/auth/logout', { mock: () => { db.session.userId = null; return { ok: true }; } }),
+
+      /**
+       * GET /api/auth/session → api/auth/session.php
+       * 200 → { user } when signed in, { user: null } when not (never 401, so
+       * pages can ask without an error). Used by core/auth.js — a UX check only.
+       */
+      session: () => request('GET', '/auth/session', { latency: 0, mock: () => ({ user: sessionUser() }) })
     },
 
     users: {
-      /** GET /api/users/me */
-      me: (role = 'student') => request('GET', '/users/me', { mock: () => sessionUser(role) }),
-      /** GET /api/users            (admin) */
-      list: () => request('GET', '/users', { mock: () => db.users }),
-      /** GET /api/users/{id} */
-      get: (id) => request('GET', `/users/${id}`, { mock: () => userById(id) || notFound('User', id) }),
+      /** GET /api/users/me → api/users/me.php — 401 when signed out */
+      me: () => request('GET', '/users/me', { mock: () => sessionUser() }),
 
       /**
        * PATCH /api/users/me → api/users/update-profile.php
        * body: { firstName, lastName, email, institution, program, yearOfStudy, bio }
        * 200 → updated user · 409 → email already registered · 422 → validation errors
        */
-      updateProfile: (changes = {}, role = 'student') => request('PATCH', '/users/me', {
+      updateProfile: (changes = {}) => request('PATCH', '/users/me', {
         body: changes,
         mock: () => {
-          const user = sessionUser(role);
+          const user = sessionUser();
           if (changes.email !== undefined && emailTaken(changes.email, user.id)) {
             return invalid('That email is already registered.', { email: 'This email is already registered to another account.' }, 409);
           }
@@ -1069,7 +1127,7 @@
           if (v instanceof ApiError) return v;
           const now = nowIso();
           const course = {
-            id: nextId('crs', db.courses), userId: sessionUser('student').id,
+            id: nextId('crs', db.courses), userId: me(),
             code: v.code, title: v.title, instructor: v.instructor || '', term: v.term,
             color: v.color, description: v.description || '', status: 'active',
             createdAt: now, lastAccessedAt: now
@@ -1688,8 +1746,8 @@
       /** GET /api/activity?limit= → api/activity/index.php — newest first, with course and link */
       list: ({ limit = 20 } = {}) => request('GET', `/activity?limit=${limit}`, {
         mock: () => {
-          const me = sessionUser('student').id;
-          return db.activity.filter(a => a.userId === me && !QUIET_ACTIVITY.includes(a.type)).sort(byNewest('createdAt')).slice(0, limit).map(enrichActivity);
+          const uid = me();
+          return db.activity.filter(a => a.userId === uid && !QUIET_ACTIVITY.includes(a.type)).sort(byNewest('createdAt')).slice(0, limit).map(enrichActivity);
         }
       })
     },
@@ -1703,7 +1761,7 @@
        */
       summary: () => request('GET', '/dashboard/summary', {
         mock: () => {
-          const user = sessionUser('student');
+          const user = sessionUser();
           const courses = myCourses().filter(c => c.status !== 'archived').map(withStats).sort(byNewest('lastAccessedAt'));
           const ids = new Set(courses.map(c => c.id));
           const lectures = db.lectures.filter(l => ids.has(l.courseId));
@@ -1715,6 +1773,7 @@
           return {
             user,
             streakDays: studyStreak(user.id),
+            weeklyGoal: weeklyGoal(user.id),
             stats: {
               courses: courses.length,
               archivedCourses: myCourses().length - courses.length,
@@ -1736,18 +1795,18 @@
 
     notifications: {
       /** GET /api/notifications */
-      list: (role = 'student') => request('GET', '/notifications', {
+      list: () => request('GET', '/notifications', {
         mock: () => {
-          const user = sessionUser(role);
+          const user = sessionUser();
           return db.notifications
             .filter(n => n.userId === user.id)
             .sort(byNewest('createdAt'));
         }
       }),
       /** PATCH /api/notifications/read-all */
-      markAllRead: (role = 'student') => request('PATCH', '/notifications/read-all', {
+      markAllRead: () => request('PATCH', '/notifications/read-all', {
         mock: () => {
-          const user = sessionUser(role);
+          const user = sessionUser();
           db.notifications.forEach(n => { if (n.userId === user.id) n.isRead = true; });
           return { ok: true };
         }
@@ -1756,7 +1815,7 @@
       markRead: (id) => request('PATCH', `/notifications/${id}`, {
         body: { isRead: true },
         mock: () => {
-          const n = db.notifications.find(x => x.id === id);
+          const n = db.notifications.find(x => x.id === id && x.userId === me());
           if (!n) return notFound('Notification', id);
           n.isRead = true;
           return n;
@@ -1792,12 +1851,12 @@
        */
       spaces: () => request('GET', '/tutor/spaces', {
         mock: () => {
-          const me = sessionUser('student').id;
+          const uid = me();
           return myCourses()
             .map(withStats)
             .sort((a, b) => (a.status === 'archived') - (b.status === 'archived') || String(b.lastAccessedAt || '').localeCompare(String(a.lastAccessedAt || '')))
             .map(course => {
-              const convs = db.conversations.filter(c => c.userId === me && c.courseId === course.id).sort(byNewest('updatedAt'));
+              const convs = db.conversations.filter(c => c.userId === uid && c.courseId === course.id).sort(byNewest('updatedAt'));
               const last = convs[0] ? enrichConversation(convs[0]) : null;
               return {
                 course,
@@ -1830,9 +1889,9 @@
        */
       list: ({ courseId } = {}) => request('GET', `/conversations${courseId ? `?courseId=${encodeURIComponent(courseId)}` : ''}`, {
         mock: () => {
-          const me = sessionUser('student').id;
+          const uid = me();
           return db.conversations
-            .filter(c => c.userId === me && findCourse(c.courseId) && (!courseId || c.courseId === courseId))
+            .filter(c => c.userId === uid && findCourse(c.courseId) && (!courseId || c.courseId === courseId))
             .sort(byNewest('updatedAt'))
             .map(enrichConversation);
         }
@@ -1857,7 +1916,7 @@
             return invalid('That lecture isn’t in this course.', { lectureId: 'That lecture isn’t in this course.' });
           }
           const now = nowIso();
-          const conv = { id: nextId('conv', db.conversations), userId: sessionUser('student').id, courseId, lectureId: lectureId || null, title: str(title).slice(0, 80) || 'New conversation', createdAt: now, updatedAt: now };
+          const conv = { id: nextId('conv', db.conversations), userId: me(), courseId, lectureId: lectureId || null, title: str(title).slice(0, 80) || 'New conversation', createdAt: now, updatedAt: now };
           db.conversations.push(conv);
           return enrichConversation(conv);
         }
@@ -1971,7 +2030,7 @@
             if (text.length > MAX_MESSAGE) return invalid(`Keep questions under ${MAX_MESSAGE} characters.`, { message: `Use ${MAX_MESSAGE} characters or fewer.` });
             if (!conv) {
               const now = nowIso();
-              conv = { id: nextId('conv', db.conversations), userId: sessionUser('student').id, courseId: cId, lectureId: lectureId || null, title: clipTitle(text), createdAt: now, updatedAt: now };
+              conv = { id: nextId('conv', db.conversations), userId: me(), courseId: cId, lectureId: lectureId || null, title: clipTitle(text), createdAt: now, updatedAt: now };
               db.conversations.push(conv);
             }
             userMessage = addMessage(conv, { role: 'user', content: text });
@@ -2048,6 +2107,120 @@
       }
     },
 
+    settings: {
+      /** GET /api/settings → api/settings/show.php — defaults until the student saves */
+      get: () => request('GET', '/settings', { mock: () => userSettings(me()) }),
+
+      /**
+       * PATCH /api/settings → api/settings/update.php
+       * body: { notifications: { lectureReady, quizReady, weeklySummary, studyReminders },
+       *         weeklyGoalDays (1–7), reducedMotion ('system'|'reduce') } — any subset
+       * 200 → settings · 422 → validation errors
+       */
+      update: (changes = {}) => request('PATCH', '/settings', {
+        body: changes,
+        mock: () => {
+          const errors = {};
+          if (changes.weeklyGoalDays !== undefined && !(Number.isInteger(changes.weeklyGoalDays) && changes.weeklyGoalDays >= 1 && changes.weeklyGoalDays <= 7)) {
+            errors.weeklyGoalDays = 'Choose between 1 and 7 days.';
+          }
+          if (changes.reducedMotion !== undefined && !['system', 'reduce'].includes(changes.reducedMotion)) {
+            errors.reducedMotion = 'Choose a motion setting.';
+          }
+          if (Object.keys(errors).length) return invalid('Check the highlighted settings.', errors);
+          const uid = me();
+          let row = db.settings.find(x => x.userId === uid);
+          if (!row) { row = { userId: uid }; db.settings.push(row); }
+          const cur = userSettings(uid);
+          if (changes.notifications) {
+            row.notifications = { ...cur.notifications };
+            Object.keys(DEFAULT_SETTINGS.notifications).forEach(k => {
+              if (typeof changes.notifications[k] === 'boolean') row.notifications[k] = changes.notifications[k];
+            });
+          }
+          if (changes.weeklyGoalDays !== undefined) row.weeklyGoalDays = changes.weeklyGoalDays;
+          if (changes.reducedMotion !== undefined) row.reducedMotion = changes.reducedMotion;
+          row.updatedAt = nowIso();
+          return userSettings(uid);
+        }
+      })
+    },
+
+    account: {
+      /**
+       * GET /api/account/export → api/account/export.php
+       * Everything stored about the signed-in student, as JSON (never passwords).
+       */
+      export: () => request('GET', '/account/export', {
+        mock: () => {
+          const uid = me();
+          const courses = myCourses();
+          const courseIds = new Set(courses.map(c => c.id));
+          const lectures = db.lectures.filter(l => courseIds.has(l.courseId));
+          const lectureIds = new Set(lectures.map(l => l.id));
+          const quizzes = db.quizzes.filter(q => courseIds.has(q.courseId) && q.status !== 'draft');
+          const convs = db.conversations.filter(c => c.userId === uid);
+          const convIds = new Set(convs.map(c => c.id));
+          return {
+            exportedAt: nowIso(),
+            format: 'TutorAI data export v1',
+            profile: sessionUser(),
+            settings: userSettings(uid),
+            courses,
+            lectures,
+            lectureText: db.lectureContent.filter(c => lectureIds.has(c.lectureId)),
+            quizzes,
+            attempts: db.attempts.filter(a => a.userId === uid),
+            conversations: convs,
+            messages: db.messages.filter(m => convIds.has(m.conversationId)),
+            summaries: db.summaries.filter(x => lectureIds.has(x.lectureId)),
+            notes: db.notes.filter(x => lectureIds.has(x.lectureId)),
+            activity: db.activity.filter(a => a.userId === uid),
+            notifications: db.notifications.filter(n => n.userId === uid)
+          };
+        }
+      }),
+
+      /** DELETE /api/conversations → api/conversations/delete-all.php — every AI Tutor chat and its messages */
+      deleteAllChats: () => request('DELETE', '/conversations', {
+        mock: () => {
+          const uid = me();
+          const ids = new Set(db.conversations.filter(c => c.userId === uid).map(c => c.id));
+          db.conversations = db.conversations.filter(c => !ids.has(c.id));
+          db.messages = db.messages.filter(m => !ids.has(m.conversationId));
+          return { deleted: ids.size };
+        }
+      }),
+
+      /**
+       * DELETE /api/account → api/account/delete.php
+       * body: { confirm: 'DELETE' }. Removes the student and everything they own,
+       * then ends the session. (Demo: only this browser's store is affected.)
+       */
+      remove: ({ confirm } = {}) => request('DELETE', '/account', {
+        body: { confirm },
+        mock: () => {
+          if (confirm !== 'DELETE') return invalid('Type DELETE to confirm.', { confirm: 'Type DELETE to confirm.' });
+          const uid = me();
+          const courseIds = new Set(myCourses().map(c => c.id));
+          const lectureIds = new Set(db.lectures.filter(l => courseIds.has(l.courseId)).map(l => l.id));
+          const quizIds = new Set(db.quizzes.filter(q => courseIds.has(q.courseId)).map(q => q.id));
+          const convIds = new Set(db.conversations.filter(c => c.userId === uid).map(c => c.id));
+          db.messages = db.messages.filter(m => !convIds.has(m.conversationId));
+          db.conversations = db.conversations.filter(c => c.userId !== uid);
+          db.attempts = db.attempts.filter(a => a.userId !== uid && !quizIds.has(a.quizId));
+          db.quizzes = db.quizzes.filter(q => !quizIds.has(q.id));
+          ['lectureContent', 'summaries', 'notes'].forEach(t => { db[t] = db[t].filter(x => !lectureIds.has(x.lectureId)); });
+          db.lectures = db.lectures.filter(l => !lectureIds.has(l.id));
+          db.courses = db.courses.filter(c => !courseIds.has(c.id));
+          ['activity', 'notifications', 'settings'].forEach(t => { db[t] = db[t].filter(x => x.userId !== uid); });
+          db.users = db.users.filter(u => u.id !== uid);
+          db.session.userId = null;
+          return { ok: true };
+        }
+      })
+    },
+
     dev: {
       /**
        * Mock only: throw away every change and restore mock-data.js.
@@ -2056,7 +2229,10 @@
       resetMockData: () => {
         if (!cfg.useMockData) return Promise.reject(new ApiError('Reset is only available in mock mode.', 501));
         try { window.localStorage.removeItem(STORE_KEY); } catch (e) { /* ignore */ }
+        const keep = db.session.userId;
         db = seed();
+        // Stay signed in if that account exists in the sample data
+        if (keep && db.users.some(u => u.id === keep)) db.session.userId = keep;
         ensureContent();
         save();
         return wait(cfg.mockLatencyMs).then(() => ({ ok: true }));
