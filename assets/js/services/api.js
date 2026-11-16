@@ -1832,23 +1832,6 @@
       })
     },
 
-    search: {
-      /** GET /api/search?q= — courses and lectures */
-      query: (q) => request('GET', `/search?q=${encodeURIComponent(q)}`, {
-        mock: () => {
-          const term = String(q || '').trim().toLowerCase();
-          if (!term) return [];
-          const courses = myCourses()
-            .filter(c => (c.title + ' ' + c.code).toLowerCase().includes(term))
-            .map(c => ({ type: 'course', id: c.id, title: c.title, subtitle: c.code }));
-          const lectures = db.lectures
-            .filter(l => findCourse(l.courseId) && l.title.toLowerCase().includes(term))
-            .map(l => ({ type: 'lecture', id: l.id, courseId: l.courseId, title: l.title, subtitle: findCourse(l.courseId).code }));
-          return [...courses, ...lectures];
-        }
-      })
-    },
-
     tutor: {
       /**
        * GET /api/tutor/spaces → api/tutor/spaces.php

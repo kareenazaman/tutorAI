@@ -1,77 +1,101 @@
-# TutorAI — Frontend (Stage 5: Quizzes and Learning Analytics)
+# TutorAI — Frontend v1.0.0
 
-**Learn. Practise. Improve.** An AI-powered academic learning platform for university and college students.
-Stage 1 built the design system, the student and admin app shells, and reusable components.
-Stage 2 added the sign-in pages, a shared auth layout, reusable form validation and the student profile.
-Stage 3 added a persistent mock store, the student dashboard, My Courses, the course workspace and lecture upload.
-Stage 4 added the lecture workspace, the AI Tutor, a mock AI that answers only from a course's lecture text, and safe Markdown rendering.
-Stage 4.1 turned the AI Tutor into per-course spaces (also embedded in each course's AI Tutor tab) and made answers aware of the student's own results.
-Stage 4.2 puts the course spaces on one page: a row of compact course cards with the selected course's space below.
-Stage 5 added quiz creation (described or built), a focus-mode quiz player, results, and the My Progress analytics page.
-Other page content (settings, admin pages) is built in later stages.
+**Learn. Practise. Improve.** An AI-powered study app for university and college students. Students add their courses, upload lecture PDFs, ask an AI Tutor that answers only from their own lecture notes, generate practice quizzes, and track progress and mastery.
+
+This repository is the **complete static frontend**: HTML, CSS and plain JavaScript (Bootstrap 5, no build step). It runs today on a **mock backend** that lives in the browser (`services/api.js` + `data/mock-data.js`) and is ready to switch to the planned **PHP + MySQL** API and **FastAPI** AI service (see [docs/API.md](docs/API.md) and [docs/schema.sql](docs/schema.sql)). TutorAI is student-only.
 
 ## Run it
 
-Open `index.html` in a browser, or serve the folder (recommended):
-
 ```bash
 python3 dev-server.py           # then visit http://localhost:5500
+python3 dev-server.py 8080      # or another port
 ```
 
-`dev-server.py` is `python3 -m http.server` with caching turned off, so changes show up on a normal reload. With plain `python3 -m http.server 5500`, Chrome may keep old JS/CSS — press **Cmd/Ctrl+Shift+R** to hard-reload.
+`dev-server.py` is `python3 -m http.server` with caching turned off (changes show on a normal reload) and a 404 page for missing paths. Plain `python3 -m http.server 5500` also works; press **Cmd/Ctrl+Shift+R** if Chrome keeps old files. An internet connection is needed for the CDNs (Bootstrap, Lucide, Chart.js, marked, DOMPurify, KaTeX, highlight.js, Google Fonts). Port 8000 is left free for the FastAPI AI service.
 
-Port 8000 is left free for the FastAPI AI service (`aiBaseUrl`).
+### Demo account
 
-An internet connection is needed for the CDNs (Bootstrap, Lucide, Google Fonts).
+| | |
+|---|---|
+| Email | `maya.chen@university.ca` |
+| Password | `Practise2026!` |
+
+A fresh browser starts **signed out**: any app page sends you to the sign-in page, which shows these credentials. You can also create your own account (it starts empty). Sample data lives in this browser only. **Reset demo data** in the account menu, or **Restore the sample data** on the sign-in page, puts it back.
+
+## Pages
+
+| Page | URL | What it's for |
+|---|---|---|
+| Launcher | `index.html` | Entry points for reviewers: sign in, the student app, the design system |
+| Sign in | `pages/auth/login.html?next=` | Email + password, remember me, demo credentials, returns to `next` after sign-in |
+| Create account | `pages/auth/register.html` | Name, email, password with strength meter, terms dialog; signs you in |
+| Forgot / reset password | `pages/auth/forgot-password.html`, `reset-password.html?token=demo` | Request a link; set a new password (demo token `demo`) |
+| Dashboard | `pages/student/dashboard.html` | Greeting, streak, **weekly goal**, continue learning, stats, courses, activity, revision suggestions |
+| My Courses | `pages/student/courses.html?q=&term=&status=&sort=` | Search, filter, sort; add, edit, archive, delete courses |
+| Course workspace | `pages/student/course.html?id=&tab=` | Tabs: overview, lectures, AI Tutor, quizzes, progress |
+| Upload lecture | `pages/student/course-upload.html?id=` | PDF upload (≤ 20 MB) with simulated processing |
+| Lecture workspace | `pages/student/lecture.html?id=&page=` | Extracted-text viewer, summary, study notes, practice quiz, Ask AI |
+| AI Tutor | `pages/student/ai-tutor.html?course=&lecture=&c=` | One space per course: card row, conversations, chat, context panel |
+| Quizzes | `pages/student/quizzes.html?course=&status=&source=` | Hub: stats, weak-topic practice, resume, retry, results |
+| Create a quiz | `pages/student/quiz-create.html?course=&lecture=&draft=` | Describe it or build it, then preview, swap and regenerate |
+| Take a quiz | `pages/student/quiz-attempt.html?id=&fresh=1` | Focus mode: autosave, resume, flags, keyboard, timer |
+| Quiz results | `pages/student/quiz-results.html?attempt=` | Score, per-lecture/topic breakdown, review, next steps |
+| My Progress | `pages/student/progress.html?course=&range=7d\|30d\|term` | Stat tiles, four charts with data tables, topics to revise, attempts |
+| My Profile | `pages/student/profile.html` | Personal details, change password, account facts |
+| Settings | `pages/student/settings.html#notifications\|goal\|appearance\|privacy\|danger` | Notifications, weekly goal, reduced motion, data export, delete chats, delete account |
+| Not found | `pages/404.html` | Static 404 (served by `dev-server.py` for any missing path) |
+| Design system | `pages/styleguide.html` | Every component, live (opens without signing in) |
+
+Every sidebar item is a finished page; there are no placeholder pages.
 
 ## Structure
 
 ```
 tutorai/
-├── index.html                  Dev launcher (student app, admin console, design system)
+├── index.html                  Demo launcher
+├── dev-server.py               No-cache dev server with a 404 page
+├── docs/
+│   ├── API.md                  Every api.js method → HTTP method, PHP/FastAPI endpoint, request, response
+│   ├── schema.sql              Draft MySQL 8 schema matching the mock data model
+│   └── QA-REPORT.md            Stage 6 review: checklist, bugs fixed, known limitations
 ├── pages/
 │   ├── _template.html          Copy this to start a new page
+│   ├── 404.html                Not found (static, no sign-in)
 │   ├── styleguide.html         Every component, live
 │   ├── auth/                   login, register, forgot-password, reset-password (auth layout)
-│   ├── student/                dashboard, courses, course (?id=&tab=), course-upload (?id=),
-│   │                           lecture (?id=&page=), ai-tutor (card row + space; ?course=&lecture=&c=), profile,
-│   │                           quizzes, quiz-create, quiz-attempt (focus layout), quiz-results, progress,
-│   │                           and the settings placeholder
-│   └── admin/                  dashboard, users, courses, documents, activity, settings
+│   └── student/                dashboard, courses, course, course-upload, lecture, ai-tutor,
+│                               quizzes, quiz-create, quiz-attempt (focus layout), quiz-results,
+│                               progress, profile, settings
 └── assets/
     ├── css/
     │   ├── main.css            Entry point, imports the rest in order
     │   ├── tokens.css          Colours, type scale, spacing, radius, shadows, motion
-    │   ├── base.css            Bootstrap theme bridge, typography, utilities
-    │   ├── layout.css          App shell: sidebar, topbar, content, responsive rules
-    │   ├── components.css      Buttons, forms, cards, modals, dropdowns, tabs, badges,
-    │   │                       progress, alerts, toasts, empty and loading states, avatars, tables
-    │   └── pages.css           Page-specific styles only
+    │   ├── base.css            Bootstrap theme bridge, typography, utilities, reduced motion
+    │   ├── layout.css          App shell: sidebar, topbar, content, auth and focus layouts
+    │   ├── components.css      Buttons, forms, cards, modals, tabs, badges, choice pills, chat, …
+    │   └── pages.css           Page-specific styles, each scoped to .page-<name>
     ├── js/
     │   ├── core/
     │   │   ├── config.js       App settings and the mock/real data switch
-    │   │   ├── utils.js        Escaping, dates, storage, URL helpers
-    │   │   ├── navigation.js   Student and admin menus (single source)
+    │   │   ├── utils.js        Escaping, dates, storage, URL helpers, reduced-motion preference
+    │   │   ├── navigation.js   Sidebar menu (single source)
+    │   │   ├── auth.js         requireAuth() / redirectIfSignedIn(): UX-only sign-in check
     │   │   ├── shell.js        Builds the app layout (sidebar + topbar) around each page
-    │   │   ├── auth-layout.js  Builds the split-screen layout for pages/auth/*
-│   │   ├── focus-layout.js Distraction-free layout (no sidebar/topbar) for the quiz player
+    │   │   ├── auth-layout.js  Split-screen layout for pages/auth/*
+    │   │   ├── focus-layout.js Distraction-free layout (no sidebar/topbar) for the quiz player
     │   │   ├── validation.js   Validators, inline errors, form binder, strength meter
     │   │   ├── markdown.js     renderMarkdown(): marked → highlight.js → KaTeX → DOMPurify
-    │   │   └── chart-theme.js  Chart.js defaults in TutorAI colours (course Progress tab, My Progress)
-    │   ├── components/         sidebar.js, topbar.js, notifications.js, palette.js, ui.js,
-    │   │                       course-ui.js (course card, lecture status, score badges),
-    │   │                       course-chat.js (a course's AI Tutor space — full page and course tab)
-    │   ├── data/mock-data.js   SEED data for the mock store
-    │   ├── data/lecture-content.js  SEED extracted text for each sample lecture (6–8 pages)
-    │   ├── services/api.js     API layer + mock store, the only thing pages talk to
+    │   │   └── chart-theme.js  Chart.js defaults in TutorAI colours
+    │   ├── components/         sidebar, topbar, notifications, palette, ui,
+    │   │                       course-ui (course card, lecture status, score badges),
+    │   │                       course-chat (a course's AI Tutor space: full page and course tab)
+    │   ├── data/mock-data.js   SEED data for the mock store (demo only)
+    │   ├── data/lecture-content.js  SEED extracted text for each sample lecture
+    │   ├── services/api.js     API layer + mock store: the only thing pages talk to
     │   ├── services/mock-ai.js Stand-in for FastAPI: retrieval, answer templates, quiz generator
-│   ├── services/quiz-engine.js  Pure grading, sanitising and stats (shared rules for PHP later)
-    │   └── pages/              One script per page: dashboard, courses, course, course-upload,
-    │                           lecture, ai-tutor, quizzes, quiz-create,
-│                           quiz-attempt, quiz-results, progress, login, register, forgot-password,
-    │                           reset-password, profile, styleguide
-    ├── img/                    logo-mark.svg, logo-full.svg
-    └── icons/                  Custom icons (Lucide covers the rest)
+    │   ├── services/quiz-engine.js  Pure grading, sanitising and stats (the rules PHP will mirror)
+    │   └── pages/              One script per page (settings.js, not-found.js, quiz-*.js, …)
+    └── img/                    logo-mark.svg, logo-full.svg (icons come from Lucide 1.73.0)
 ```
 
 ## How a page works
@@ -85,13 +109,13 @@ Each page declares who it is. `shell.js` injects the sidebar, topbar, notificati
 
 | Attribute | Purpose |
 |---|---|
-| `data-shell` | `student` or `admin` |
+| `data-shell` | `student` (the only shell; the app pages are hidden until `core/auth.js` confirms a session) |
 | `data-page` | The page's own id. Matches an `id` in `navigation.js` to highlight the nav link and set the title. |
 | `data-nav` | Optional: highlight a different nav item. `course.html` uses `data-nav="courses"`. |
 | `data-root` | Path back to the project root |
 | `data-title` | Optional title override |
 | `data-search="false"` | Hides topbar search |
-| `data-placeholder` (on `<main>`) | Shows a "coming soon" state. Remove it once the page has real content. |
+| `data-auth="optional"` | Page opens without signing in (only the style guide) |
 
 Page scripts wait for the shell:
 
@@ -115,6 +139,56 @@ TutorAI.shell.setCrumbs([
 ]);
 ```
 
+## Accounts, settings and backend readiness (stage 6)
+
+### Student-only
+
+TutorAI has one kind of account. The earlier second console (its pages, menu, styles, demo account and notifications) is gone. Each user keeps a `role` field fixed to `'student'` for future use; nothing in the app reads it. Stores from earlier stages are upgraded in place: the other account and its notifications are removed, and the signed-in student stays signed in.
+
+### Sign-in and the session
+
+- The mock store holds `session: { userId }`, standing in for the PHP session cookie. A **fresh browser starts signed out**. `auth.login` and `auth.register` set it; `auth.logout` and `account.remove` clear it.
+- While signed out, every API call outside `/auth/*` fails with **401**, as the PHP API will.
+- `core/auth.js`:
+  - `requireAuth()` runs before the shell (and the focus layout) builds a page. Signed-out visitors go to `pages/auth/login.html?next=<page>` and come back after signing in. `next` must be a `pages/student/*.html` path, so sign-in can't be turned into an open redirect.
+  - `redirectIfSignedIn()` sends a signed-in student from the sign-in and create-account pages to the dashboard.
+  - App pages are hidden by CSS from the first paint until the check passes, so nothing flashes.
+  - **These checks are UX only.** Anyone can edit browser JavaScript; PHP enforces sessions and ownership on every request.
+- Seed rows (quizzes, attempts, chats, activity) are created for the demo student (`mockData.demoUserId`), whoever is signed in.
+
+### Settings (`user_settings`)
+
+| Setting | Values | Used by |
+|---|---|---|
+| Notifications | `lectureReady`, `quizReady`, `weeklySummary`, `studyReminders` (booleans) | A notification is only created if its type is on (`lecture` → `lectureReady`, `quiz` → `quizReady`, `progress` → `weeklySummary`, `reminder` → `studyReminders`). The bell menu links here. |
+| Weekly study goal | `weeklyGoalDays` 1–7 (default 4) | Dashboard chip "N/goal days this week". A study day is any day (Monday start) with a logged activity: reading a lecture, an AI Tutor message, a quiz submission, an upload, generated notes. |
+| Appearance | `reducedMotion`: `system` (follow the device) or `reduce` (always) | Sets `html[data-motion="reduce"]` from the first paint (a per-device copy is kept in localStorage `tai.pref.motion`). That turns off CSS animations, count-ups, chart animation and smooth scrolling. The device's own reduced-motion setting is always respected. |
+
+Changes save immediately (`PATCH /api/settings` with just that field). A failed save puts the control back and explains why. Privacy: **Download my data** (`account.export()` → a JSON file, never passwords), **Delete all my AI chats** (with confirmation). Danger zone: **Delete account** (type `DELETE`). It removes the student and everything they own, signs out, and the sign-in page confirms it.
+
+### Not found
+
+`pages/404.html` is a static page in the design system (no shell, no sign-in). `dev-server.py` returns it with status 404 for any missing path. On Apache use `ErrorDocument 404 /pages/404.html`.
+
+### Accessibility
+
+- Text colour tokens pass WCAG AA everywhere: `--tai-text-muted` (#5F5F69) is at least 5:1 on white and every pastel, and `--tai-text-faint` (#6E6E78) at least 4.5:1 on white and the sidebar grey.
+- Focus: `:focus-visible` draws the focus ring as a box-shadow, plus a transparent outline that shows up in Windows high-contrast mode.
+- Every field has a label and every icon button has a name. Live regions announce saves, quiz progress and results. Dialogs trap focus (Bootstrap).
+- Reduced motion: the device setting or Settings → Appearance.
+
+### PHP / MySQL readiness
+
+| Check | Where |
+|---|---|
+| Data models in one place | `data/mock-data.js` (seed), `services/api.js` (store, rules, endpoints), `services/quiz-engine.js` (grading); MySQL version in `docs/schema.sql` |
+| Mock data kept out of the UI | Pages only call `TutorAI.api.*`; nothing reads `mockData` except `api.js` |
+| Form names match fields | snake_case `name`s (`full_name`, `lecture_number`, `weekly_goal_days`, `confirm`, …) are what PHP reads; each page maps them to the camelCase JSON in `docs/API.md` |
+| Uploads | The upload form is `multipart/form-data`; in live mode `lectures.create` sends `FormData` (`lecture_file`, `title`, `lecture_number`, `description`) |
+| IDs | Prefixed everywhere (`usr_ crs_ lec_ qz_ q_ att_ conv_ msg_ act_ ntf_ sum_ note_`); `nextId()` never reuses a number |
+| No secrets in the browser | localStorage holds only the mock store (`scrub()` drops any password/token/secret key), the remembered email, sidebar state and the motion preference. No API keys anywhere. |
+| Demo features are labelled | Sign-in badge "Demo mode", demo-credentials note, upload "Demo mode: files are not uploaded or read", "Preview of extracted text (demo)", generated pages marked "Demo content", "Demo response" on AI replies, "AI feedback (demo)" on short answers, Settings "Demo" note, Reset demo data |
+
 ## Quizzes and learning analytics (stage 5)
 
 | Page | What it does |
@@ -131,7 +205,7 @@ The create, attempt and results pages highlight **Quizzes** in the sidebar and s
 
 | Entity | Fields | Notes |
 |---|---|---|
-| `quizzes` (`qz_`) | `id, courseId, title, source, lectureIds[], difficulty, settings{count, types[], explanations, timeLimitMin}, status, createdAt, questions[]` | `status`: `draft` → `ready` (saved or started) or `archived`. `source`: `lecture` \| `ai` \| `weak-topics` \| `missed`. Drafts more than a day old are deleted. A quiz's state for display (not started, in progress, completed, best score, last score) is calculated from its attempts and never stored. |
+| `quizzes` (`qz_`) | `id, courseId, title, source, lectureIds[], difficulty, settings{count, types[], explanations, timeLimitMin}, status, createdAt, questions[]` | `status`: `draft` → `ready` (saved or started) or `archived`. `source`: `lecture` \| `ai` \| `weak-topics` \| `retry` (Practise what I missed). Drafts more than a day old are deleted. A quiz's state for display (not started, in progress, completed, best score, last score) is calculated from its attempts and never stored. |
 | question (`q_`) | `id, type, prompt, options[{id, text}], correct, explanation, lectureId, page, topic, difficulty` | `type`: `mcq` \| `multi` \| `true_false` \| `short`. A short answer stores `correct: { model, keywords[] }`. **Each question has its own `lectureId`**, so a quiz that spans two lectures credits each lecture separately. |
 | `attempts` (`att_`) | `id, quizId, userId, status, answers{qid: value}, currentIndex, flagged[], order[], shuffleOptions, startedAt, deadlineAt, submittedAt, score, total, percent, perQuestion[]` | `status`: `in_progress` \| `submitted`. There is at most one open attempt per quiz. A retry creates a new attempt in a shuffled order; earlier attempts are kept. |
 | `activity` (`act_`) | `id, userId, type, courseId, refId, title, createdAt` | `type`: `quiz_submitted` \| `quiz_created` \| `lecture_viewed` \| `chat_message` \| `lecture_uploaded` \| `notes_generated` (plus the stage 3 course events). `refId` points at the attempt, lecture or quiz. `lecture_viewed` and `chat_message` are counted in streaks and charts but hidden from "Recent activity". |
@@ -410,13 +484,13 @@ Shared course UI lives in `components/course-ui.js`: `TutorAI.components.CourseC
 
 | Page | What it does |
 |---|---|
-| `pages/auth/login.html` | Email + password (show/hide), remember me, forgot-password link, loading button, demo credentials. Students go to `pages/student/dashboard.html`, admins to `pages/admin/dashboard.html`. |
+| `pages/auth/login.html` | Email + password (show/hide), remember me, forgot-password link, loading button, demo credentials. Goes to `?next=` (a safe app path) or the dashboard. |
 | `pages/auth/register.html` | Full name, email, password with live strength meter and checklist, confirm password, terms. Shows a success state with the new `usr_` id. |
 | `pages/auth/forgot-password.html` | Email → "If an account exists, we've sent a link" state, plus a demo link to the reset page. |
 | `pages/auth/reset-password.html?token=…` | New password + confirm with strength meter → success state. No token, or a token the API rejects, shows "invalid or expired link". |
 | `pages/student/profile.html` | Header card, view/edit personal details, change password, account information. |
 
-**Demo credentials** (mock mode): `maya.chen@university.ca` (student) or `d.okafor@tutorai.app` (admin), password `Practise2026!`.
+**Demo credentials** (mock mode): `maya.chen@university.ca`, password `Practise2026!`.
 Reset token: `demo`. Any email works for "forgot password".
 
 **Mock errors to try**
@@ -492,7 +566,7 @@ Validation errors use `{ "message": "…", "errors": { "email": "…" } }` with 
 - **Passwords are never stored** in localStorage, sessionStorage or anywhere else. Forms clear password fields after each attempt.
 - "Remember me" keeps only the email, in localStorage (`tai.auth.email`).
 - In mock mode, profile edits and the last-login time are saved in the mock store (`tai.mockdb.v1`, see above) like every other change. (Stage 2 used sessionStorage; stage 3 moved them into the store.)
-- Topbar **Sign out** calls `auth.logout()` and opens `pages/auth/login.html`.
+- Topbar **Sign out** calls `auth.logout()` (clears the session) and opens `pages/auth/login.html`.
 
 ## Reusable JS components
 
@@ -521,7 +595,7 @@ TutorAI.shell.setUser(user); // refresh the topbar name and avatar after a profi
 - **Dates:** ISO-8601 UTC strings.
 - **Shared layout with PHP:** the `<head>` and script tags in `_template.html` can move into `includes/head.php` and `includes/scripts.php` once PHP is added.
 
-Not implemented yet, by design: real sessions and password hashing (PHP), the MySQL database, real file uploads and PDF text extraction, the real LLM (FastAPI). In mock mode these are simulated and data lives in the browser's mock store.
+Not implemented yet, by design: real sessions and password hashing (PHP), the MySQL database ([docs/schema.sql](docs/schema.sql)), real file uploads and PDF text extraction, the real LLM (FastAPI). In mock mode these are simulated and data lives in the browser's mock store. The full contract is in [docs/API.md](docs/API.md).
 
 ## Responsive behaviour
 
