@@ -39,7 +39,7 @@ A fresh browser starts **signed out**: any app page sends you to the sign-in pag
 | Quizzes | `pages/student/quizzes.html?course=&status=&source=` | Hub: stats, weak-topic practice, resume, retry, results |
 | Create a quiz | `pages/student/quiz-create.html?course=&lecture=&draft=` | Describe it or build it, then preview, swap and regenerate |
 | Take a quiz | `pages/student/quiz-attempt.html?id=&fresh=1` | Focus mode: autosave, resume, flags, keyboard, timer |
-| Quiz results | `pages/student/quiz-results.html?attempt=` | Score, per-lecture/topic breakdown, review, next steps |
+| Quiz results | `pages/student/quiz-results.html?attempt=` | Score ring, per-lecture/topic breakdown, review, next steps; a one-time celebration on a new attempt |
 | My Progress | `pages/student/progress.html?course=&range=7d\|30d\|term` | Stat tiles, four charts with data tables, topics to revise, attempts |
 | My Profile | `pages/student/profile.html` | Personal details, change password, account facts |
 | Settings | `pages/student/settings.html#notifications\|goal\|appearance\|privacy\|danger` | Notifications, weekly goal, reduced motion, data export, delete chats, delete account |
@@ -87,6 +87,7 @@ tutorai/
     │   │   ├── focus-layout.js Distraction-free layout (no sidebar/topbar) for the quiz player
     │   │   ├── validation.js   Validators, inline errors, form binder, strength meter
     │   │   ├── markdown.js     renderMarkdown(): marked → highlight.js → KaTeX → DOMPurify
+    │   │   ├── motion.js       Web Animations helpers: countUp, ring, pop, fadeIn, confetti
     │   │   └── chart-theme.js  Chart.js defaults in TutorAI colours
     │   ├── components/         sidebar, topbar, notifications, palette, ui,
     │   │                       course-ui (course card, lecture status, score badges),
@@ -159,6 +160,19 @@ TutorAI.shell.setCrumbs([
   - **These checks are UX only.** Anyone can edit browser JavaScript; PHP enforces sessions, roles and ownership on every request.
 - **Deactivated accounts** can't sign in (403, "This account has been deactivated…"). A student who is deactivated while signed in loses the session on their next request.
 - Seed rows (quizzes, attempts, chats, activity) are created for the demo student (`mockData.demoUserId`), whoever is signed in.
+
+### Results celebration (`core/motion.js`)
+
+On the **first view of a new attempt** (`attempts.markViewed()` sets `resultsViewedAt` and returns `firstView`):
+
+- The score ring fills from 0 while the percentage counts up (1.3s, ease-out).
+- **≥ 80%:** when the ring finishes, about 35 confetti pieces in the TutorAI pastels and black burst from behind the ring (Web Animations API), then are removed (~1.6s).
+- **100%:** a bigger burst (50 pieces) and a "Perfect score" chip that pops in.
+- **Below 80%:** no confetti; the rest of the results fade in gently.
+
+Reopening results shows the final score straight away; a retry is a new attempt, so it can celebrate again. Seeded and older attempts count as already seen. With reduced motion (device setting or Settings → Appearance) everything is shown in its final state. Confetti is drawn in a fixed `pointer-events: none` layer (`.tai-confetti`), so it never scrolls the page, shifts layout or blocks clicks.
+
+`TutorAI.motion` is reusable: `countUp(el, to)`, `ring(circle, percent)`, `pop(el)`, `fadeIn(elements)`, `confetti(originEl, { count, power })`, `reduced()`. Load `core/motion.js` after `components/ui.js`.
 
 ### Admin console
 

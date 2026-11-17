@@ -97,6 +97,7 @@ Questions are sent **without** `correct`, `explanation`, `model` or `keywords` e
 |---|---|---|---|---|
 | `start(quizId, { fresh })` | POST | `/api/quizzes/{id}/attempts` → `attempts/start.php` | `{ fresh }` | `{ attempt, quiz (no answers), resumed }`. Resumes the open attempt, otherwise starts a new one (retries shuffle the order). Sets `deadlineAt` for timed quizzes. |
 | `get(id)` | GET | `/api/attempts/{id}` → `attempts/show.php` | none | In progress: `{ attempt, quiz (no answers), expired }`. Submitted: `{ attempt, quiz (with answers and explanations), previous, byLecture, byTopic }`. |
+| `markViewed(id)` | POST | `/api/attempts/{id}/viewed` → `attempts/viewed.php` | none | `{ firstView, resultsViewedAt }`. Sets `results_viewed_at` the first time only (`UPDATE … WHERE results_viewed_at IS NULL`), so the results page celebrates once per attempt. **409** if not submitted. |
 | `save(id, patch)` | PATCH | `/api/attempts/{id}` → `attempts/save.php` | `{ answers: { qid: value }, currentIndex, flagged[] }` | `{ ok }` (autosave). **409** if already submitted. |
 | `submit(id)` | POST | `/api/attempts/{id}/submit` → `attempts/submit.php` | none | `{ id, score, total, percent }`. Grades on the server from stored answers (rules in [GUIDE.md](GUIDE.md#grading-rules-servicesquiz-enginejs)). Logs `quiz_submitted`. |
 | `listByQuiz(quizId)` | GET | `/api/quizzes/{id}/attempts` → `attempts/index.php` | none | attempt summaries, newest first (no answers) |

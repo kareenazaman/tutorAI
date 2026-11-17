@@ -54,6 +54,11 @@ document.addEventListener('tutorai:ready', async () => {
   T.shell.setCrumbs([{ label: 'Quizzes', href: url('pages/student/quizzes.html') }, { label: quiz.title }, { label: 'Results' }]);
   document.title = `Results: ${quiz.title} · TutorAI`;
 
+  // Celebration (core/motion.js): only on a new attempt's first view, never with reduced motion
+  const M = T.motion;
+  const celebrateFirstView = !attempt.resultsViewedAt && !!M && !M.reduced();
+  const perfect = attempt.percent === 100;
+
   /* ---- Pieces --------------------------------------------------------------- */
   const band = E.band(attempt.percent);
   const lowestLecture = byLecture.find(l => l.lectureId && quiz.lectures.some(x => x.id === l.lectureId && x.status === 'ready'));
@@ -69,13 +74,20 @@ document.addEventListener('tutorai:ready', async () => {
           <span class="tai-chip align-self-start">${T.ui.icon('list-checks')}${escape(quiz.course ? quiz.course.code : '')} · ${escape(quiz.title)}</span>
           <h1 class="visually-hidden" id="qr-title">Results for ${escape(quiz.title)}</h1>
           <div class="qr-hero__score">
-            <span class="qr-hero__percent" data-count-to="${attempt.percent}" data-count-suffix="%">0%</span>
+            <div class="qr-ring" role="img" aria-label="Score: ${attempt.percent}%" data-ring>
+              <svg viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+                <circle class="qr-ring__track" cx="60" cy="60" r="52" pathLength="100"></circle>
+                <circle class="qr-ring__fill" cx="60" cy="60" r="52" pathLength="100" stroke-dasharray="100" style="stroke-dashoffset:${celebrateFirstView ? 100 : 100 - attempt.percent}" data-ring-fill></circle>
+              </svg>
+              <span class="qr-hero__percent qr-ring__value" aria-hidden="true" data-ring-value>${celebrateFirstView ? 0 : attempt.percent}%</span>
+            </div>
             <div>
               <p class="qr-hero__line">${fmtScore(attempt.score)} / ${attempt.total} points</p>
               <p class="tai-tile__meta mb-0">${band === 'strong' ? 'Strong — ' : band === 'okay' ? 'Okay — ' : 'Worth revising — '}${correctCount} correct${partialCount ? `, ${partialCount} partly correct` : ''}, ${wrongCount} incorrect${unansweredCount ? `, ${unansweredCount} not answered` : ''}</p>
             </div>
           </div>
           <div class="tai-hero__meta">
+            ${perfect ? `<span class="tai-chip qr-perfect" data-perfect${celebrateFirstView ? ' style="opacity:0"' : ''}>${T.ui.icon('trophy')}Perfect score</span>` : ''}
             ${previous
               ? `<span class="tai-chip">${T.ui.icon(diff >= 0 ? 'trending-up' : 'trending-down')}${diff === 0 ? 'Same as' : `${diff > 0 ? '+' : ''}${diff} points vs`} last attempt (${previous.percent}%)</span>`
               : '<span class="tai-chip">First attempt</span>'}
@@ -183,6 +195,38 @@ document.addEventListener('tutorai:ready', async () => {
       <p class="tai-meta mb-0 text-center py-4" data-review-empty hidden></p>
     </section>`;
   T.ui.enhance(root);
+  celebrate();
+
+  /**
+   * First view of a new attempt: the ring fills with a count-up (~1.3s, ease-out).
+   * ≥ 80%: confetti bursts from behind the ring when it finishes (bigger at 100%,
+   * plus the "Perfect score" chip pops in). Below 80%: the results fade in gently.
+   * Re-opened results, or reduced motion: everything is shown in its final state.
+   */
+  async function celebrate() {
+    const live = document.querySelector('[data-live]');
+    let first = false;
+    try { first = (await T.api.attempts.markViewed(attempt.id)).firstView; } catch (e) { first = false; }
+    const ringEl = $('[data-ring]', root);
+    const fill = $('[data-ring-fill]', root);
+    const value = $('[data-ring-value]', root);
+    const chip = $('[data-perfect]', root);
+    const showFinal = () => {
+      fill.style.strokeDashoffset = String(100 - attempt.percent);
+      value.textContent = `${attempt.percent}%`;
+      if (chip) chip.style.opacity = '1';
+    };
+    if (!celebrateFirstView || !first) { showFinal(); return; }   // seen before (e.g. in another tab)
+
+    const rest = Array.from(root.children).slice(1);              // everything after the hero row
+    if (attempt.percent < 80) M.fadeIn(rest, { duration: 520, stagger: 90 });
+    await Promise.all([M.ring(fill, attempt.percent), M.countUp(value, attempt.percent, { suffix: '%' })]);
+    if (attempt.percent >= 80) {
+      if (perfect) M.pop(chip);
+      M.confetti(ringEl, perfect ? { count: 50, power: 1.3 } : { count: 35 });
+    }
+    if (live) { live.textContent = ''; setTimeout(() => { live.textContent = perfect ? `Perfect score: ${attempt.percent}%.` : `You scored ${attempt.percent}%.`; }, 30); }
+  }
 
   /* ---- Interactions ---------------------------------------------------------- */
   const seg = $('[data-segmented]', root);

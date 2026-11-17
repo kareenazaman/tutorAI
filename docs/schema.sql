@@ -290,6 +290,7 @@ CREATE TABLE attempts (
   started_at      DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   deadline_at     DATETIME(3)  NULL,                    -- started_at + time limit
   submitted_at    DATETIME(3)  NULL,
+  results_viewed_at DATETIME(3) NULL,                   -- first time the results were opened (celebration runs once)
   score           DECIMAL(6,1) NULL,                    -- points (short answers can earn 0.5)
   total           SMALLINT UNSIGNED NOT NULL,
   percent         TINYINT UNSIGNED NULL,

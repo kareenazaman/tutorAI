@@ -61,7 +61,7 @@
 
   function seed() {
     // `fresh` → ensureContent() builds quizzes/attempts from the seed plans once helpers exist
-    const data = { meta: { version: STORE_VERSION, seededAt: nowIso(), fresh: true, adminSeeded: true } };
+    const data = { meta: { version: STORE_VERSION, seededAt: nowIso(), fresh: true, adminSeeded: true, resultsViewedFlag: true } };
     CORE_TABLES.forEach(t => { data[t] = t === 'quizzes' ? [] : clone(T.mockData[t]); });
     AI_TABLES.forEach(t => { data[t] = []; });
     return data;
@@ -93,6 +93,11 @@
     // Account status is 'active' | 'deactivated' (older stores said 'suspended')
     data.users.forEach(u => { if (u.status === 'suspended') { u.status = 'deactivated'; changed = true; } });
     if (!data.meta.adminSeeded) { addAdminSeed(data); changed = true; }
+    // Results celebrate only on a new attempt's first view: older results count as seen
+    if (!data.meta.resultsViewedFlag) {
+      data.attempts.forEach(a => { if (a.status === 'submitted' && !a.resultsViewedAt) a.resultsViewedAt = a.submittedAt; });
+      data.meta.resultsViewedFlag = true; changed = true;
+    }
     return changed;
   }
 
@@ -648,7 +653,7 @@
       answers, currentIndex: qs.length - 1, flagged: qs.filter(q => wrong.has(q.id)).slice(0, 1).map(q => q.id),
       order: qs.map(q => q.id), shuffleOptions: n > 0,
       startedAt: new Date(new Date(submittedAt).getTime() - minutes * 60000).toISOString(), deadlineAt: null,
-      submittedAt, score: g.score, total: g.total, percent: g.percent, perQuestion: g.perQuestion
+      submittedAt, resultsViewedAt: submittedAt, score: g.score, total: g.total, percent: g.percent, perQuestion: g.perQuestion
     };
     db.attempts.push(att);
     return att;
@@ -1690,6 +1695,25 @@
             byLecture: group(q => q.lectureId, q => ({ lectureId: q.lectureId, title: (lec(q.lectureId) || {}).title || 'Removed lecture', lectureNumber: (lec(q.lectureId) || {}).lectureNumber || null })),
             byTopic: group(q => q.topic, q => ({ topic: q.topic }))
           };
+        }
+      }),
+
+      /**
+       * POST /api/attempts/{id}/viewed → api/attempts/viewed.php
+       * Records the first time the results were opened (attempts.results_viewed_at)
+       * and says whether this call was that first view — the results page only
+       * celebrates then. Atomic on the server (UPDATE … WHERE results_viewed_at IS NULL).
+       * → { firstView, resultsViewedAt } · 404 · 409 (not submitted yet)
+       */
+      markViewed: (id) => request('POST', `/attempts/${encodeURIComponent(id)}/viewed`, {
+        latency: 0,
+        mock: () => {
+          const att = db.attempts.find(a => a.id === id && a.userId === me());
+          if (!att || !myQuiz(att.quizId)) return notFound('Attempt', id);
+          if (att.status !== 'submitted') return new ApiError('This attempt hasn’t been submitted yet.', 409);
+          if (att.resultsViewedAt) return { firstView: false, resultsViewedAt: att.resultsViewedAt };
+          att.resultsViewedAt = nowIso();
+          return { firstView: true, resultsViewedAt: att.resultsViewedAt };
         }
       }),
 

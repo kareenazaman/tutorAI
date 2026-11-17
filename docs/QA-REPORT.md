@@ -119,6 +119,20 @@ Stage 6 first removed the old admin console (6 placeholder pages). The assignmen
 
 **How it was tested:** the Claude-in-Chrome connection dropped during this round, so the checks above ran in headless Chrome, driven over the DevTools protocol from Node (real page loads, clicks and form submits; screenshots reviewed at 1440, 768 and 390), plus Node tests of the API.
 
+## Results celebration
+
+Added to `quiz-results.html` with `core/motion.js` (Web Animations API, no new libraries). The score ring is new: the hero previously showed only a counting percentage, so the ring now sits in that spot with the percentage inside it, using the tile's existing ink and pastel colours.
+
+| Check (headless Chrome, sampled over time) | Result |
+|---|---|
+| 100%, first view | ✅ Ring and count-up run together (20% at 0.9s, 96% at 1.65s, done ~1.9s). The burst starts when the ring finishes: 50 pieces, lasting 1.58s, then the layer is removed. The "Perfect score" chip pops in. |
+| 83%, first view / retry at 83% | ✅ 35 pieces each time (a retry is a new attempt). |
+| 50% | ✅ Ring fills, no confetti, results fade in. |
+| Reopened results, seeded attempt | ✅ Final score shown at once, no confetti. |
+| Settings → Reduce motion; OS prefers-reduced-motion | ✅ Final score at once, no confetti or chip animation. |
+| No scrolling, layout shift or blocked clicks | ✅ 0 horizontal overflow throughout; the hero's position never changes; `elementFromPoint` at the ring centre hits the score, not the confetti (`pointer-events: none`). |
+| 1440 / 768 / 390 | ✅ No console messages during or after the burst. |
+
 ## Known limitations (what is mocked, and why)
 
 | Area | Today (demo) | Why | Production plan |

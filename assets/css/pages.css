@@ -520,6 +520,12 @@ body.tai-focus { background: var(--tai-gray-50); }
 .page-quiz-results .qr-hero { min-height: 230px; gap: var(--tai-space-4); }
 .page-quiz-results .qr-hero__score { display: flex; align-items: flex-end; flex-wrap: wrap; gap: var(--tai-space-5); margin-top: var(--tai-space-4); }
 .page-quiz-results .qr-hero__percent { font-family: var(--tai-font-display); font-size: clamp(3.5rem, 8vw, 5.5rem); line-height: 0.9; color: var(--tai-black); font-variant-numeric: tabular-nums; }
+.page-quiz-results .qr-ring { position: relative; width: clamp(124px, 15vw, 150px); aspect-ratio: 1; flex-shrink: 0; display: grid; place-items: center; }
+.page-quiz-results .qr-ring svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+.page-quiz-results .qr-ring__track { fill: none; stroke: rgba(24, 24, 27, 0.12); stroke-width: 10; }
+.page-quiz-results .qr-ring__fill { fill: none; stroke: var(--tai-black); stroke-width: 10; stroke-linecap: round; }
+.page-quiz-results .qr-ring__value { position: relative; font-size: clamp(2rem, 3.6vw, 2.5rem); line-height: 1; }
+.page-quiz-results .qr-hero__score { align-items: center; }
 .page-quiz-results .qr-hero__line { font-size: var(--tai-fs-xl); font-weight: var(--tai-fw-semibold); color: var(--tai-black); margin: 0 0 2px; }
 .page-quiz-results .qr-next__actions { display: grid; gap: var(--tai-space-2); margin-top: var(--tai-space-4); }
 .page-quiz-results .qr-next__actions .btn { justify-content: flex-start; }

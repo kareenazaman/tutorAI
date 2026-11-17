@@ -1616,3 +1616,9 @@ a.tai-chat__source:hover { background: var(--tai-gray-50); color: var(--tai-blac
 .tai-choice input:hover + span { border-color: var(--tai-black); }
 .tai-choice input:checked + span { background: var(--tai-black); border-color: var(--tai-black); color: var(--tai-white); }
 .tai-choice input:focus-visible + span { box-shadow: var(--tai-focus-ring); }
+
+/* ---- Confetti layer (core/motion.js confetti()) ----------------------------
+   Fixed and clipped to the viewport: never scrolls the page, shifts layout or
+   catches clicks. Removed from the DOM when the burst ends. */
+.tai-confetti { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 1090; contain: strict; }
+.tai-confetti__piece { position: absolute; left: 0; top: 0; border-radius: 2px; will-change: transform, opacity; }
