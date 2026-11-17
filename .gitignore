@@ -1,2 +1,5 @@
 .DS_Store
 __pycache__/
+
+# Design PDF: kept locally, not in the repo
+*.pdf
