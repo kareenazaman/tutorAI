@@ -13,6 +13,8 @@ python3 dev-server.py 8080      # or another port
 
 `dev-server.py` is `python3 -m http.server` with caching turned off (changes show on a normal reload) and a 404 page for missing paths. Plain `python3 -m http.server 5500` also works; press **Cmd/Ctrl+Shift+R** if Chrome keeps old files. An internet connection is needed for the CDNs (Bootstrap, Lucide, Chart.js, marked, DOMPurify, KaTeX, highlight.js, Google Fonts). Port 8000 is left free for the FastAPI AI service.
 
+**Cache busting:** every local CSS and JS link carries a version tag (`courses.js?v=1.0.1`, also the `@import`s in `main.css`). When you change any CSS or JS, bump the tag across the project (search for `?v=` and replace), so browsers that cached the old files can't run old scripts against new pages.
+
 ### Demo accounts
 
 | Role | Name | Email | Password |
