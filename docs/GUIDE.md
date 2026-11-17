@@ -31,7 +31,7 @@ A fresh browser starts **signed out**: any app page sends you to the sign-in pag
 | Create account | `pages/auth/register.html` | Name, email, password with strength meter, terms dialog; signs you in |
 | Forgot / reset password | `pages/auth/forgot-password.html`, `reset-password.html?token=demo` | Request a link; set a new password (demo token `demo`) |
 | Dashboard | `pages/student/dashboard.html` | Greeting, streak, **weekly goal**, continue learning, stats, courses, activity, revision suggestions |
-| My Courses | `pages/student/courses.html?q=&term=&status=&sort=` | Search, filter, sort; add, edit, archive, delete courses |
+| My Courses | `pages/student/courses.html?q=&term=&status=` | Search and filter; always most recently opened first; add, edit, archive, delete courses |
 | Course workspace | `pages/student/course.html?id=&tab=` | Tabs: overview, lectures, AI Tutor, quizzes, progress |
 | Upload lecture | `pages/student/course-upload.html?id=` | PDF upload (≤ 20 MB) with simulated processing |
 | Lecture workspace | `pages/student/lecture.html?id=&page=` | Extracted-text viewer, summary, study notes, practice quiz, Ask AI |
@@ -451,7 +451,7 @@ KaTeX's auto-render extension isn't loaded: `renderMarkdown` must return a finis
 | Page | What it does |
 |---|---|
 | `pages/student/dashboard.html` | Greeting hero (date, study streak), Continue learning (last opened course), stat tiles (courses, lectures, quizzes completed, average score), top 3 course cards, recent activity, recommended revision, quick actions. One call: `dashboard.summary()`. |
-| `pages/student/courses.html` | Search (title or code), term and status filters, sort (recent, name, progress), all kept in the URL: `?q=&term=&status=&sort=`. Add/Edit share one modal; Delete confirms and names the course. Deep links: `?new=1`, `?edit=crs_2001`. |
+| `pages/student/courses.html` | Search (title or code), term and status filters, kept in the URL: `?q=&term=&status=`. Courses are always listed most recently opened first (never-opened courses last, newest first); there is no sort control. Add/Edit share one modal; Delete confirms and names the course. Deep links: `?new=1`, `?edit=crs_2001`. |
 | `pages/student/course.html?id=…&tab=…` | Cover header with progress and mastery, Upload lecture. Tabs: `overview`, `lectures` (search, delete, `&lecture=lec_…` highlights a row), `ai-tutor` (suggested questions → `ai-tutor.html?course=…&q=…`), `quizzes`, `progress` (progress and mastery tiles, best score per lecture, Chart.js scores over time, topic mastery). Tabs switch without reloading; back and forward work. Opening the page updates `lastAccessedAt`. |
 | `pages/student/course-upload.html?id=…` | Drag-and-drop or Browse, one PDF up to 20 MB (extension + MIME type, empty and too-large checks). Title and lecture number are prefilled from the file name. Simulated Uploading → Extracting text → Processing → Ready stepper; Cancel while uploading. Without `?id=` it asks which course. |
 
@@ -475,7 +475,7 @@ Missing or unknown course ids show **Course not found** with a link back to My C
 
 Example: a course with 4 ready lectures, best scores 92, 80, 58 and one not quizzed → progress **75%** (3 of 4), mastery **77%** ((92 + 80 + 58) ÷ 3).
 
-Where they appear: course cards (progress bar with "3 of 4 lectures quizzed", mastery badge), the course header (two bars side by side), the Progress tab (two tiles plus a per-lecture list), and the dashboard's Continue learning tile. The My Courses **Progress** sort orders by progress, then mastery.
+Where they appear: course cards (progress bar with "3 of 4 lectures quizzed", mastery badge), the course header (two bars side by side), the Progress tab (two tiles plus a per-lecture list), and the dashboard's Continue learning tile.
 
 **Recommended revision** lists topics averaging under 65% (lowest first; was 75% before stage 5). The **study streak** counts consecutive days with activity or a completed quiz, ending today (or yesterday).
 

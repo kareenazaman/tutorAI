@@ -1,8 +1,9 @@
 /**
  * TutorAI — My Courses (pages/student/courses.html)
  * ------------------------------------------------------------------
- * Search / filter / sort live in the URL (?q=&term=&status=&sort=)
- * so a refresh or a shared link keeps the view.
+ * Search and filters live in the URL (?q=&term=&status=) so a refresh or a
+ * shared link keeps the view. Courses are always listed most recently
+ * opened first (never-opened courses last, newest first).
  * One modal adds and edits courses:
  *   create → TutorAI.api.courses.create   (POST /api/courses)
  *   edit   → TutorAI.api.courses.update   (PATCH /api/courses/{id})
@@ -23,7 +24,6 @@ document.addEventListener('tutorai:ready', async () => {
   const searchEl = filtersEl.elements.q;
   const termEl = filtersEl.elements.term;
   const statusEl = filtersEl.elements.status;
-  const sortGroup = $('[data-segmented]', filtersEl);
 
   const modalEl = document.getElementById('course-modal');
   const formEl = document.getElementById('course-form');
@@ -32,7 +32,6 @@ document.addEventListener('tutorai:ready', async () => {
   const descEl = formEl.elements.description;
   const descCount = document.getElementById('course-description-count');
 
-  const SORTS = ['recent', 'name', 'progress'];
   let courses = [];
   let editingId = null;
   let highlightId = null;
@@ -42,8 +41,7 @@ document.addEventListener('tutorai:ready', async () => {
   const state = {
     q: params.get('q') || '',
     term: params.get('term') || '',
-    status: ['active', 'archived'].includes(params.get('status')) ? params.get('status') : '',
-    sort: SORTS.includes(params.get('sort')) ? params.get('sort') : 'recent'
+    status: ['active', 'archived'].includes(params.get('status')) ? params.get('status') : ''
   };
 
   function syncUrl() {
@@ -51,7 +49,6 @@ document.addEventListener('tutorai:ready', async () => {
     if (state.q) p.set('q', state.q);
     if (state.term) p.set('term', state.term);
     if (state.status) p.set('status', state.status);
-    if (state.sort !== 'recent') p.set('sort', state.sort);
     const qs = p.toString();
     history.replaceState(null, '', window.location.pathname + (qs ? `?${qs}` : ''));
   }
@@ -85,12 +82,10 @@ document.addEventListener('tutorai:ready', async () => {
       (!q || `${c.title} ${c.code}`.toLowerCase().includes(q)) &&
       (!state.term || c.term === state.term) &&
       (!state.status || c.status === state.status));
-    const sorters = {
-      recent: (a, b) => String(b.lastAccessedAt || '').localeCompare(String(a.lastAccessedAt || '')),
-      name: (a, b) => a.title.localeCompare(b.title, 'en', { sensitivity: 'base' }),
-      progress: (a, b) => b.progress - a.progress || (b.mastery ?? -1) - (a.mastery ?? -1) || a.title.localeCompare(b.title)
-    };
-    return list.sort(sorters[state.sort]);
+    // Most recently opened first; never-opened courses last, newest first
+    return list.sort((a, b) =>
+      String(b.lastAccessedAt || '').localeCompare(String(a.lastAccessedAt || '')) ||
+      String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
   }
 
   function renderTermFilter() {
@@ -161,24 +156,6 @@ document.addEventListener('tutorai:ready', async () => {
   searchEl.addEventListener('input', debounce(() => { state.q = searchEl.value; syncUrl(); render(); }, 180));
   termEl.addEventListener('change', () => { state.term = termEl.value; syncUrl(); render(); });
   statusEl.addEventListener('change', () => { state.status = statusEl.value; syncUrl(); render(); });
-
-  function setSortButtons() {
-    $$('.tai-segmented__item', sortGroup).forEach(b => {
-      const on = b.dataset.value === state.sort;
-      b.classList.toggle('active', on);
-      b.setAttribute('aria-pressed', String(on));
-      b.removeAttribute('aria-selected');
-    });
-  }
-  sortGroup.addEventListener('tai:segment', (e) => {
-    state.sort = SORTS.includes(e.detail.value) ? e.detail.value : 'recent';
-    setSortButtons();
-    syncUrl();
-    render();
-  });
-  // Move the sliding indicator to the sort from the URL
-  const initialSort = $(`.tai-segmented__item[data-value="${state.sort}"]`, sortGroup);
-  if (initialSort && state.sort !== 'recent') initialSort.click(); else setSortButtons();
 
   function clearFilters() {
     state.q = ''; state.term = ''; state.status = '';
@@ -321,5 +298,6 @@ document.addEventListener('tutorai:ready', async () => {
     if (c) openModal(c);
     else T.ui.toast({ title: 'Course not found', message: 'That course may have been deleted.', variant: 'warning' });
   }
-  if (deep.has('new') || deep.has('edit')) syncUrl();
+  // Drop one-off deep links, and the old ?sort= from earlier versions' links
+  if (deep.has('new') || deep.has('edit') || deep.has('sort')) syncUrl();
 });
