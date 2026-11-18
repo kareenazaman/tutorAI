@@ -13,7 +13,7 @@ python3 dev-server.py 8080      # or another port
 
 `dev-server.py` is `python3 -m http.server` with caching turned off (changes show on a normal reload) and a 404 page for missing paths. Plain `python3 -m http.server 5500` also works; press **Cmd/Ctrl+Shift+R** if Chrome keeps old files. An internet connection is needed for the CDNs (Bootstrap, Lucide, Chart.js, marked, DOMPurify, KaTeX, highlight.js, Google Fonts). Port 8000 is left free for the FastAPI AI service.
 
-**Cache busting:** every local CSS and JS link carries a version tag (`courses.js?v=1.0.1`, also the `@import`s in `main.css`). When you change any CSS or JS, bump the tag across the project (search for `?v=` and replace), so browsers that cached the old files can't run old scripts against new pages.
+**Cache busting:** every local CSS and JS link carries a version tag (`courses.js?v=1.0.2`, also the `@import`s in `main.css`). When you change any CSS or JS, bump the tag across the project (search for `?v=` and replace), so browsers that cached the old files can't run old scripts against new pages.
 
 ### Demo accounts
 
@@ -32,7 +32,7 @@ A fresh browser starts **signed out**: any app page sends you to the sign-in pag
 | Sign in | `pages/auth/login.html?next=` | Email + password, remember me, demo credentials, returns to `next` after sign-in |
 | Create account | `pages/auth/register.html` | Name, email, password with strength meter, terms dialog; signs you in |
 | Forgot / reset password | `pages/auth/forgot-password.html`, `reset-password.html?token=demo` | Request a link; set a new password (demo token `demo`) |
-| Dashboard | `pages/student/dashboard.html` | Greeting, streak, **weekly goal**, continue learning, stats, courses, activity, revision suggestions |
+| Dashboard | `pages/student/dashboard.html` | Greeting, **weekly goal**, continue learning, stats, courses, activity, revision suggestions |
 | My Courses | `pages/student/courses.html?q=&term=&status=` | Search and filter; always most recently opened first; add, edit, archive, delete courses |
 | Course workspace | `pages/student/course.html?id=&tab=` | Tabs: overview, lectures, AI Tutor, quizzes, progress |
 | Upload lecture | `pages/student/course-upload.html?id=` | PDF upload (≤ 20 MB) with simulated processing |
@@ -242,7 +242,7 @@ The create, attempt and results pages highlight **Quizzes** in the sidebar and s
 | `quizzes` (`qz_`) | `id, courseId, title, source, lectureIds[], difficulty, settings{count, types[], explanations, timeLimitMin}, status, createdAt, questions[]` | `status`: `draft` → `ready` (saved or started) or `archived`. `source`: `lecture` \| `ai` \| `weak-topics` \| `retry` (Practise what I missed). Drafts more than a day old are deleted. A quiz's state for display (not started, in progress, completed, best score, last score) is calculated from its attempts and never stored. |
 | question (`q_`) | `id, type, prompt, options[{id, text}], correct, explanation, lectureId, page, topic, difficulty` | `type`: `mcq` \| `multi` \| `true_false` \| `short`. A short answer stores `correct: { model, keywords[] }`. **Each question has its own `lectureId`**, so a quiz that spans two lectures credits each lecture separately. |
 | `attempts` (`att_`) | `id, quizId, userId, status, answers{qid: value}, currentIndex, flagged[], order[], shuffleOptions, startedAt, deadlineAt, submittedAt, score, total, percent, perQuestion[]` | `status`: `in_progress` \| `submitted`. There is at most one open attempt per quiz. A retry creates a new attempt in a shuffled order; earlier attempts are kept. |
-| `activity` (`act_`) | `id, userId, type, courseId, refId, title, createdAt` | `type`: `quiz_submitted` \| `quiz_created` \| `lecture_viewed` \| `chat_message` \| `lecture_uploaded` \| `notes_generated` (plus the stage 3 course events). `refId` points at the attempt, lecture or quiz. `lecture_viewed` and `chat_message` are counted in streaks and charts but hidden from "Recent activity". |
+| `activity` (`act_`) | `id, userId, type, courseId, refId, title, createdAt` | `type`: `quiz_submitted` \| `quiz_created` \| `lecture_viewed` \| `chat_message` \| `lecture_uploaded` \| `notes_generated` (plus the stage 3 course events). `refId` points at the attempt, lecture or quiz. `lecture_viewed` and `chat_message` are counted in the weekly goal and charts but hidden from "Recent activity". |
 
 **Answers never reach the attempt page.** Until an attempt is submitted, `quizzes.get`, `attempts.start` and `attempts.get` return questions passed through `quizEngine.sanitizeQuestion`, which removes `correct`, `explanation` and short-answer `model`/`keywords`. Grading happens in the API (`attempts.submit`), comparing the stored answers with the stored correct answers. Only a **submitted** attempt's `attempts.get` includes answers and explanations. (In mock mode the store in localStorage plays the server, so it holds the answers, just as the PHP database will.)
 
@@ -452,7 +452,7 @@ KaTeX's auto-render extension isn't loaded: `renderMarkdown` must return a finis
 
 | Page | What it does |
 |---|---|
-| `pages/student/dashboard.html` | Greeting hero (date, study streak), Continue learning (last opened course), stat tiles (courses, lectures, quizzes completed, average score), top 3 course cards, recent activity, recommended revision, quick actions. One call: `dashboard.summary()`. |
+| `pages/student/dashboard.html` | Greeting hero (date, weekly study goal), Continue learning (last opened course), stat tiles (courses, lectures, quizzes completed, average score), top 3 course cards, recent activity, recommended revision, quick actions. One call: `dashboard.summary()`. |
 | `pages/student/courses.html` | Search (title or code), term and status filters, kept in the URL: `?q=&term=&status=`. Courses are always listed most recently opened first (never-opened courses last, newest first); there is no sort control. Add/Edit share one modal; Delete confirms and names the course. Deep links: `?new=1`, `?edit=crs_2001`. |
 | `pages/student/course.html?id=…&tab=…` | Cover header with progress and mastery, Upload lecture. Tabs: `overview`, `lectures` (search, delete, `&lecture=lec_…` highlights a row), `ai-tutor` (suggested questions → `ai-tutor.html?course=…&q=…`), `quizzes`, `progress` (progress and mastery tiles, best score per lecture, Chart.js scores over time, topic mastery). Tabs switch without reloading; back and forward work. Opening the page updates `lastAccessedAt`. |
 | `pages/student/course-upload.html?id=…` | Drag-and-drop or Browse, one PDF up to 20 MB (extension + MIME type, empty and too-large checks). Title and lecture number are prefilled from the file name. Simulated Uploading → Extracting text → Processing → Ready stepper; Cancel while uploading. Without `?id=` it asks which course. |
@@ -479,7 +479,7 @@ Example: a course with 4 ready lectures, best scores 92, 80, 58 and one not quiz
 
 Where they appear: course cards (progress bar with "3 of 4 lectures quizzed", mastery badge), the course header (two bars side by side), the Progress tab (two tiles plus a per-lecture list), and the dashboard's Continue learning tile.
 
-**Recommended revision** lists topics averaging under 65% (lowest first; was 75% before stage 5). The **study streak** counts consecutive days with activity or a completed quiz, ending today (or yesterday).
+**Recommended revision** lists topics averaging under 65% (lowest first; was 75% before stage 5).
 
 **Deletes cascade**: deleting a course deletes its lectures and quizzes (and notifications that link to it); activity history is kept without the link. Deleting a lecture keeps its quizzes but unlinks them.
 

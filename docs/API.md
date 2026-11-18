@@ -18,7 +18,7 @@ IDs are prefixed strings (`usr_1001`, `crs_2001`, `lec_3001`, `qz_4001`, `q_…`
 | Errors | `{ "success": false, "message": "…", "errors": { "field": "message" } }`, with status `401` (signed out), `403`, `404`, `409` (conflict, e.g. duplicate), `410` (expired link), `413` (file too large), `422` (validation), `503` (AI unavailable). `validation.js` puts `errors.*` messages under the matching form fields. |
 | Field names | JSON uses camelCase (`lectureNumber`). HTML form `name`s are snake_case (`lecture_number`), which is what PHP reads from `$_POST`. Each page script maps one to the other. |
 | Dates | ISO-8601 UTC strings. |
-| Computed values | Course `progress`/`mastery`, quiz status and best score, topic averages, streaks and weekly goal progress are calculated on every request and never stored. The definitions are in [GUIDE.md](GUIDE.md#analytics-definitions). |
+| Computed values | Course `progress`/`mastery`, quiz status and best score, topic averages and weekly goal progress are calculated on every request and never stored. The definitions are in [GUIDE.md](GUIDE.md#analytics-definitions). |
 
 Notation: `user` = `{ id, role, firstName, lastName, email, institution, program, yearOfStudy, bio, avatarUrl, avatarColor, status, createdAt, lastLoginAt }`, plus `title` for admins (no password fields, ever). `status` is `active` or `deactivated`.
 
@@ -114,7 +114,7 @@ All analytics calls take a filter `f = { courseId?, from?, to? }` (ISO dates).
 | `analytics.byCourse(f)` | GET | `/api/analytics/courses` | `[{ courseId, code, title, color, progress, mastery, attempts }]` |
 | `analytics.byTopic(f)` | GET | `/api/analytics/topics` | `[{ topic, courseId, code, lectureId, average, best, attempts, scores, band }]`, lowest first |
 | `analytics.activity(f)` | GET | `/api/analytics/activity` | `{ days: [{ date, total, byType }], types }` |
-| `dashboard.summary()` | GET | `/api/dashboard/summary` | `{ user, streakDays, weeklyGoal: { goalDays, studiedDays, weekStart }, stats, continueCourse, recentCourses, recentActivity, weakTopics, nextQuiz }` |
+| `dashboard.summary()` | GET | `/api/dashboard/summary` | `{ user, weeklyGoal: { goalDays, studiedDays, weekStart }, stats, continueCourse, recentCourses, recentActivity, weakTopics, nextQuiz }` |
 | `activity.list({ limit })` | GET | `/api/activity?limit=` | `[{ id, type, courseId, refId, title, createdAt, course, link }]` |
 
 ## Notifications: `api.notifications`

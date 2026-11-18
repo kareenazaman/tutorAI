@@ -30,7 +30,7 @@
 
   const now = Date.now();
   const ago = (minutes) => new Date(now - minutes * 60000).toISOString();
-  /** A local time `days` ago at `hour`:00 (keeps seeded streaks on real calendar days). */
+  /** A local time `days` ago at `hour`:00 (keeps seeded activity on real calendar days). */
   const daysAgo = (days, hour = 14) => {
     const d = new Date(now);
     d.setDate(d.getDate() - days);

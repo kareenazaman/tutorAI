@@ -432,7 +432,7 @@
   }
 
   const ACTIVITY_TAB = { lecture_uploaded: 'lectures', lecture_failed: 'lectures', lecture_deleted: 'lectures', quiz_created: 'quizzes', quiz_submitted: 'quizzes', notes_generated: 'lectures' };
-  /** Activity that's too frequent for "Recent activity" lists (still counted in streaks and charts). */
+  /** Activity that's too frequent for "Recent activity" lists (still counted in the weekly goal and charts). */
   const QUIET_ACTIVITY = ['lecture_viewed', 'chat_message'];
 
   function enrichActivity(a) {
@@ -449,18 +449,6 @@
     return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
   };
 
-  /** Consecutive days with study activity, ending today (or yesterday). */
-  function studyStreak(userId) {
-    const days = new Set(db.activity.filter(a => a.userId === userId).map(a => dayKey(a.createdAt)));
-    const cursor = new Date();
-    if (!days.has(dayKey(cursor.toISOString()))) cursor.setDate(cursor.getDate() - 1);
-    let streak = 0;
-    while (days.has(dayKey(cursor.toISOString()))) {
-      streak++;
-      cursor.setDate(cursor.getDate() - 1);
-    }
-    return streak;
-  }
 
   /** Study days so far this week (Monday start) against the student's weekly goal. */
   function weeklyGoal(userId) {
@@ -1893,7 +1881,6 @@
           const average = avg(atts.map(a => a.percent));
           return {
             user,
-            streakDays: studyStreak(user.id),
             weeklyGoal: weeklyGoal(user.id),
             stats: {
               courses: courses.length,

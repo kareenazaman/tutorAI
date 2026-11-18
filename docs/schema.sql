@@ -13,7 +13,7 @@
 --     (first_name → firstName).
 --   • Times are stored in UTC (DATETIME(3)) and returned as ISO-8601.
 --   • Calculated values (course progress/mastery, quiz status, best score,
---     topic averages, streaks) are NEVER stored — the API computes them from
+--     topic averages, weekly goal progress) are NEVER stored — the API computes them from
 --     attempts and attempt_answers, exactly as api.js does.
 --   • Every student query in PHP filters by the session's user_id (ownership),
 --     so one student can never read another student's rows. Admin endpoints
@@ -318,7 +318,7 @@ CREATE TABLE attempt_answers (
 ) ENGINE=InnoDB;
 
 -- -----------------------------------------------------------------------------
--- activity_log — drives Recent activity, streaks, the weekly goal and charts.
+-- activity_log — drives Recent activity, the weekly goal and charts.
 -- ref_id holds the related row's prefixed id (attempt, lecture, quiz).
 -- course_id is kept (SET NULL) so history survives a course delete.
 -- -----------------------------------------------------------------------------

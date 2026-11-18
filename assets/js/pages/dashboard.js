@@ -31,7 +31,6 @@ document.addEventListener('tutorai:ready', async () => {
 
   function heroTile(s) {
     const date = new Date().toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' });
-    const streak = s.streakDays;
     const topics = s.weakTopics.length;
     const parts = [];
     if (s.nextQuiz) parts.push(`a quiz waiting in ${escape(s.nextQuiz.course.code)}`);
@@ -43,7 +42,6 @@ document.addEventListener('tutorai:ready', async () => {
       <section class="tai-tile tai-tile--lavender span-8 dash-hero" aria-labelledby="dash-greeting">
         <div class="tai-hero__meta">
           <span class="tai-chip">${T.ui.icon('calendar')}${escape(date)}</span>
-          <span class="tai-chip">${T.ui.icon('flame')}${streak ? `${streak}-day streak` : 'Start a streak today'}</span>
           ${goalChip(s.weeklyGoal)}
         </div>
         <h1 class="tai-hero__title" id="dash-greeting">${greeting()}, <em>${escape(s.user.firstName)}</em>.</h1>
