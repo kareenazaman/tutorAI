@@ -19,7 +19,7 @@ window.TutorAI = window.TutorAI || {};
 TutorAI.config = Object.freeze({
   appName: 'TutorAI',
   tagline: 'Learn. Practise. Improve.',
-  version: '1.0.2',
+  version: '1.0.3',
 
   /**
    * Data source switch.

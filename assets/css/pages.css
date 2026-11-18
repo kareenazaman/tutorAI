@@ -563,13 +563,6 @@ body.tai-focus { background: var(--tai-gray-50); }
 .page-settings .form-switch .form-check-input { margin: 0; cursor: pointer; }
 .page-settings .st-goal { display: flex; align-items: center; gap: var(--tai-space-2); margin: var(--tai-space-4) 0 0; font-size: var(--tai-fs-sm); color: var(--tai-text-muted); }
 .page-settings .st-goal strong { color: var(--tai-black); }
-.page-settings .st-options { display: grid; gap: var(--tai-space-3); grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
-.page-settings .st-option { display: flex; gap: var(--tai-space-3); align-items: flex-start; padding: var(--tai-space-4); border: 1px solid var(--tai-border-strong); border-radius: var(--tai-radius-lg); cursor: pointer; transition: var(--tai-transition); }
-.page-settings .st-option:hover { border-color: var(--tai-black); }
-.page-settings .st-option:has(input:checked) { border-color: var(--tai-black); box-shadow: inset 0 0 0 1px var(--tai-black); background: var(--tai-lavender); }
-.page-settings .st-option .form-check-input { margin: 3px 0 0; flex-shrink: 0; }
-.page-settings .st-option__title { display: block; font-weight: var(--tai-fw-semibold); color: var(--tai-black); }
-.page-settings .st-option__hint { display: block; font-size: var(--tai-fs-sm); color: var(--tai-text-muted); }
 .page-settings .st-action { display: grid; gap: var(--tai-space-3); }
 .page-settings .st-danger { border-color: var(--tai-pink-ink); }
 .page-settings [data-settings-form][aria-busy="true"] { opacity: .7; }

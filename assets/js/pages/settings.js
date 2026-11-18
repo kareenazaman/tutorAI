@@ -54,11 +54,9 @@ document.addEventListener('tutorai:ready', async () => {
     const n = $('[data-settings-form="notifications"]', root);
     Object.entries(NOTIFY_FIELDS).forEach(([name, key]) => { n.elements[name].checked = !!settings.notifications[key]; });
     $$('input[name="weekly_goal_days"]', root).forEach(i => { i.checked = Number(i.value) === settings.weeklyGoalDays; });
-    $$('input[name="reduced_motion"]', root).forEach(i => { i.checked = i.value === settings.reducedMotion; });
+    $('#st-reduce-motion', root).checked = settings.reducedMotion === 'reduce';
     $$('[data-settings-form] input', root).forEach(i => { i.disabled = false; });
     renderGoal();
-    const deviceReduces = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    $('[data-device-motion]', root).textContent = `Uses your device’s setting — currently ${deviceReduces ? 'reduced motion' : 'full motion'}.`;
   }
 
   function renderGoal() {
@@ -125,10 +123,9 @@ document.addEventListener('tutorai:ready', async () => {
 
   $('[data-settings-form="appearance"]', root).addEventListener('change', async (e) => {
     if (e.target.name !== 'reduced_motion') return;
-    const before = settings.reducedMotion;
-    const ok = await save('appearance', { reducedMotion: e.target.value }, () => {
-      $$('input[name="reduced_motion"]', root).forEach(i => { i.checked = i.value === before; });
-    });
+    // One switch: on = 'reduce', off = 'system' (normal animations)
+    const input = e.target;
+    const ok = await save('appearance', { reducedMotion: input.checked ? 'reduce' : 'system' }, () => { input.checked = !input.checked; });
     if (ok) T.utils.applyMotion(settings.reducedMotion);   // takes effect now, and on every page load on this device
   });
 

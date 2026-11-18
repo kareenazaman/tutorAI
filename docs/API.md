@@ -48,7 +48,7 @@ Notation: `user` = `{ id, role, firstName, lastName, email, institution, program
 | Method | HTTP | Endpoint | Request | Response |
 |---|---|---|---|---|
 | `settings.get()` | GET | `/api/settings` → `settings/show.php` | none | `{ notifications: { lectureReady, quizReady, weeklySummary, studyReminders }, weeklyGoalDays, reducedMotion, updatedAt }` (defaults if never saved) |
-| `settings.update(changes)` | PATCH | `/api/settings` → `settings/update.php` | any subset of the above (`weeklyGoalDays` 1–7, `reducedMotion` `'system'`/`'reduce'`) | settings. **422** out of range. |
+| `settings.update(changes)` | PATCH | `/api/settings` → `settings/update.php` | any subset of the above (`weeklyGoalDays` 1–7, `reducedMotion` `'reduce'` (switch on) / `'system'` (off)) | settings. **422** out of range. |
 | `account.export()` | GET | `/api/account/export` → `account/export.php` | none | `{ exportedAt, format, profile, settings, courses, lectures, lectureText, quizzes, attempts, conversations, messages, summaries, notes, activity, notifications }`. Never includes passwords. |
 | `account.deleteAllChats()` | DELETE | `/api/conversations` → `conversations/delete-all.php` | none | `{ deleted }` (conversations removed, with their messages) |
 | `account.remove({ confirm })` | DELETE | `/api/account` → `account/delete.php` | `{ confirm: "DELETE" }` | `{ ok: true }`. Deletes the user (cascades to all their data and files) and ends the session. **422** without the confirmation. |

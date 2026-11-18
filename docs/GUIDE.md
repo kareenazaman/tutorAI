@@ -13,7 +13,7 @@ python3 dev-server.py 8080      # or another port
 
 `dev-server.py` is `python3 -m http.server` with caching turned off (changes show on a normal reload) and a 404 page for missing paths. Plain `python3 -m http.server 5500` also works; press **Cmd/Ctrl+Shift+R** if Chrome keeps old files. An internet connection is needed for the CDNs (Bootstrap, Lucide, Chart.js, marked, DOMPurify, KaTeX, highlight.js, Google Fonts). Port 8000 is left free for the FastAPI AI service.
 
-**Cache busting:** every local CSS and JS link carries a version tag (`courses.js?v=1.0.2`, also the `@import`s in `main.css`). When you change any CSS or JS, bump the tag across the project (search for `?v=` and replace), so browsers that cached the old files can't run old scripts against new pages.
+**Cache busting:** every local CSS and JS link carries a version tag (`courses.js?v=1.0.3`, also the `@import`s in `main.css`). When you change any CSS or JS, bump the tag across the project (search for `?v=` and replace), so browsers that cached the old files can't run old scripts against new pages.
 
 ### Demo accounts
 
@@ -195,7 +195,7 @@ One page, `pages/admin/dashboard.html`, in the dark admin shell. The sidebar has
 |---|---|---|
 | Notifications | `lectureReady`, `quizReady`, `weeklySummary`, `studyReminders` (booleans) | A notification is only created if its type is on (`lecture` → `lectureReady`, `quiz` → `quizReady`, `progress` → `weeklySummary`, `reminder` → `studyReminders`). The bell menu links here. |
 | Weekly study goal | `weeklyGoalDays` 1–7 (default 4) | Dashboard chip "N/goal days this week". A study day is any day (Monday start) with a logged activity: reading a lecture, an AI Tutor message, a quiz submission, an upload, generated notes. |
-| Appearance | `reducedMotion`: `system` (follow the device) or `reduce` (always) | Sets `html[data-motion="reduce"]` from the first paint (a per-device copy is kept in localStorage `tai.pref.motion`). That turns off CSS animations, count-ups, chart animation and smooth scrolling. The device's own reduced-motion setting is always respected. |
+| Appearance | A **Reduce motion** switch (`reducedMotion`: `reduce` when on, `system` when off) | Sets `html[data-motion="reduce"]` from the first paint (a per-device copy is kept in localStorage `tai.pref.motion`). That turns off CSS animations, count-ups, chart animation and smooth scrolling. The device's own reduced-motion setting is always respected. |
 
 Changes save immediately (`PATCH /api/settings` with just that field). A failed save puts the control back and explains why. Privacy: **Download my data** (`account.export()` → a JSON file, never passwords), **Delete all my AI chats** (with confirmation). Danger zone: **Delete account** (type `DELETE`). It removes the student and everything they own, signs out, and the sign-in page confirms it.
 
